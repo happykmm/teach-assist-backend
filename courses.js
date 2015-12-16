@@ -24,21 +24,18 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-    console.log("params:");
-    console.log(req.params);
-    console.log("query:");
-    console.log(req.query);
-    console.log("body:");
     console.log(req.body);
-    console.log("content-type:"+req.get('content-type'));
+    res.json(req.body);
 });
 
 router.put('/', function(req, res) {
-
+    console.log(req.body);
+    res.json(req.body);
 });
 
 router.delete('/', function(req, res) {
-
+    console.log(req.body);
+    res.json(req.body);
 });
 
 module.exports = router;
