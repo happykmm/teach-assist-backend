@@ -6,7 +6,9 @@ var courses = require('./courses');
 
 var app        = express();
 app.use(dbInit);
+// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/json
 app.use(bodyParser.json());
 app.use('/courses', courses);
 
