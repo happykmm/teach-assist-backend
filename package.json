@@ -1,7 +1,7 @@
 {
-  "name": "first-api-server",
+  "name": "mongo-express-demo",
   "version": "1.0.0",
-  "description": "first RESTful API server with node && express.js",
+  "description": "A RESTful API server with mongodb && express.js",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
