@@ -24,18 +24,39 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-    console.log(req.body);
-    res.json(req.body);
+    var name = req.body.name;
+    var teacher = req.body.teacher;
+    var result = {
+        code: 0,
+        desc: "success!"
+    };
+    req.db.collection("courses").insertOne( { "name":name,"teacher":teacher} );
+    res.json(result);
 });
 
 router.put('/', function(req, res) {
-    console.log(req.body);
-    res.json(req.body);
+    var newname=req.body.newname;
+    var teacher=req.body.teacher;
+    var result = {
+        code: 0,
+        desc: "success!"
+    };
+    req.db.collection("courses").updateOne
+    (
+        { "teacher": teacher },
+        { $set:{ "name":newname } }
+    );
+    res.json(result);
 });
 
 router.delete('/', function(req, res) {
-    console.log(req.body);
-    res.json(req.body);
+    var name=req.query.names;
+    var result = {
+        code: 0,
+        desc: "success!"
+    };
+    req.db.collection("courses").deleteOne( { "name":name } );
+    res.json(result);
 });
 
 module.exports = router;
