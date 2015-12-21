@@ -12,6 +12,7 @@
     "body-parser": "^1.14.1",
     "es6-promise": "^3.0.2",
     "express": "^4.13.3",
-    "mongodb": "^2.0.52"
+    "mongodb": "^2.0.52",
+    "qiniu": "^6.1.9"
   }
 }

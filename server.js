@@ -1,6 +1,7 @@
 var express    = require('express');
 var bodyParser = require('body-parser');
 var dbInit = require('./db-init');
+var loginCheck = require('./login-check');
 var courses = require('./courses');
 
 
@@ -10,6 +11,7 @@ app.use(dbInit);
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
 app.use(bodyParser.json());
+app.use(loginCheck);
 app.use('/courses', courses);
 
 
