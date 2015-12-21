@@ -18,16 +18,16 @@ router.get('/*', function(req, res, next) {
     //res.end();
 });
 
-router.post('/', function() {
-
+router.post('/', function(req, res, next) {
+    next();
 });
 
-router.put('/', function() {
-
+router.put('/', function(req, res, next) {
+    next();
 });
 
-router.delete('/', function() {
-
+router.delete('/', function(req, res, next) {
+    next();
 });
 console.log(111);
 module.exports = router;
