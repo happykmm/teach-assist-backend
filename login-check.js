@@ -2,7 +2,7 @@ var router = require("express")();
 
 router.all('*', function(req, res, next) {
     console.log('req');
-    res.set('Access-Control-Allow-Origin', '*');git
+    res.set('Access-Control-Allow-Origin', '*');
 
     next();
 });
