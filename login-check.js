@@ -8,13 +8,11 @@ router.all('*', function(req, res, next) {
 
 
 function checkToken(req, res, next, token) {
-    console.log(token);
     var cursor = req.db.collection('users').find({ token: token }).limit(1);
     cursor.each(function(err, doc) {
         if (err === null) {
             if (doc !== null) {
-                console.log(doc);
-                req.user = {
+                req.users = {
                     _id: doc._id,
                     type: doc.type,
                     number: doc.number,
