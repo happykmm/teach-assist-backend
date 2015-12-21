@@ -1,6 +1,7 @@
 var router = require("express")();
 
 router.get('/', function(req, res) {
+    console.log(req.users);
     var result = {
         code: 0,
         desc: "success!",

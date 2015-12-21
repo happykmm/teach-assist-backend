@@ -1,33 +1,52 @@
 var router = require("express")();
 
+//Allow CORS
 router.all('*', function(req, res, next) {
-    console.log('req');
     res.set('Access-Control-Allow-Origin', '*');
-
     next();
 });
 
-router.get('/*', function(req, res, next) {
 
-    console.log('here')
-    //res.json({
-    //    code: 1,
-    //    desc: "please login first"
-    //});
-    next();
-    //res.end();
+function checkToken(req, res, next, token) {
+    console.log(token);
+    var cursor = req.db.collection('users').find({ token: token }).limit(1);
+    cursor.each(function(err, doc) {
+        if (err === null) {
+            if (doc !== null) {
+                console.log(doc);
+                req.user = {
+                    _id: doc._id,
+                    type: doc.type,
+                    number: doc.number,
+                    realname: doc.realname,
+                    intro: doc.intro,
+                    courses: doc.courses
+                }
+                next();
+                return false;
+            } else
+                res.json({ code: 1, desc: "Please Login first!" });
+        } else
+            res.json({ code: 1, desc: "Internal Server Error!" });
+
+    });
+}
+
+
+router.get('*', function(req, res, next) {
+    checkToken(req, res, next, req.query.token);
 });
 
-router.post('/', function(req, res, next) {
-    next();
+router.post('*', function(req, res, next) {
+    checkToken(req, res, next, req.body.token);
 });
 
-router.put('/', function(req, res, next) {
-    next();
+router.put('*', function(req, res, next) {
+    checkToken(req, res, next, req.body.token);
 });
 
-router.delete('/', function(req, res, next) {
-    next();
+router.delete('*', function(req, res, next) {
+    checkToken(req, res, next, req.query.token);
 });
-console.log(111);
+
 module.exports = router;
