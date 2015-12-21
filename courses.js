@@ -7,7 +7,7 @@ router.get('/', function(req, res) {
         desc: "success!",
         content: []
     };
-    var cursor = req.db.collection("courses").find( { teacher: req.query.teacher} );
+    var cursor = req.db.collection("courses").find( { user_id: req.users._id} );
     cursor.each(function(err, doc) {
         if (err === null) {
             if (doc !== null) {
