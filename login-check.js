@@ -14,7 +14,7 @@ function checkToken(req, res, next, token) {
         if (err === null) {
             if (doc !== null) {
                 console.log(doc);
-                req.user = {
+                req.users = {
                     _id: doc._id,
                     type: doc.type,
                     number: doc.number,

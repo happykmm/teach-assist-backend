@@ -32,37 +32,33 @@ router.get('/:course_id', function(req, res) {
 
 
 router.post('/:course_id', function(req, res) {
-    var user_id = req.body.user_id;
-    var user_name = req.body.user_name;
-    var course_id = req.params.course_id;
-    var title = req.body.title;
-    var content = req.body.content;
-    var timestamp = Date.now();
-    var count_read = req.body.count_read;
-    var count_zan = req.body.zan;
-    var top = req.body.top;
     var result = {
         code: 0,
         desc: "success!"
     };
-    req.db.collection("posts").insertOne( { "user_id":user_id,"user_name":user_name,
-        "course_id":course_id,"title":title,"content":content,"timestamp":timestamp,
-        "count_read":count_read,"count_zan":count_zan,"top":top} );
+    req.db.collection("posts").insertOne( {
+        "user_id":req.users._id,
+        "user_name":req.users.realname,
+        "course_id": req.params.course_id,
+        "title":req.body.title,
+        "content":req.body.content,
+        "timestamp":Date.now(),
+        "count_read": 0,
+        "count_zan":0,
+        "top":false
+    } );
     res.json(result);
 });
 
 router.put('/:course_id', function(req, res) {
-    var id = req.body.id;
-    var newtitle = req.body.title;
-    var newcontent = req.body.content;
     var result = {
         code: 0,
         desc: "success!"
     };
     var promise = req.db.collection("posts").updateOne
     (
-        { "_id":ObjectId(id)},
-        { $set:{ "title":newtitle,"content":newcontent} }
+        { "_id":ObjectId(req.body._id)},
+        { $set:{ "title":req.body.title,"content":req.body.content} }
     );
     promise.then(function(updateResult) {
         console.log(updateResult);
@@ -71,14 +67,12 @@ router.put('/:course_id', function(req, res) {
 });
 
 router.delete('/:course_id', function(req, res) {
-    var id=req.query.id;
     var result = {
         code: 0,
         desc: "success!"
     };
-    req.db.collection("posts").deleteOne( { "_id":ObjectId(req.query.id) } );
+    req.db.collection("posts").deleteOne( { "_id":ObjectId(req.query._id) } );
     res.json(result);
 });
-
 
 module.exports = router;
