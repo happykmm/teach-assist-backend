@@ -1,5 +1,4 @@
-var express = require("express");
-var router = express.Router();
+var router = require("express")();
 
 router.get('/', function(req, res) {
     var result = {
@@ -18,6 +17,7 @@ router.get('/', function(req, res) {
         } else {
             result.code = 1;
             result.desc = err.toString();
+            res.json(result);
             return false;
         }
     });
