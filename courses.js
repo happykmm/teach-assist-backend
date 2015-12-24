@@ -32,6 +32,9 @@ router.get('/', function(req, res) {
         content: []
     };
     var cursor = req.db.collection("courses").find( { _id: { $in : req.users.courses } } );
+    cursor.count().then(function(result) {
+        console.log(result);
+    });
     cursor.each(function(err, doc) {
         if (err === null) {
             if (doc !== null) {
