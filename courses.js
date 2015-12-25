@@ -1,7 +1,7 @@
 var router = require("express")();
 var ObjectId = require('mongodb').ObjectId;
 
-//----------------------ĞÂÔö¿Î³Ì------------------------
+//----------------------æ–°å¢è¯¾ç¨‹------------------------
 router.post('/', function(req, res) {
     var result = {
         code: 0,
@@ -26,7 +26,7 @@ router.post('/', function(req, res) {
     }
 });
 
-//----------------------ÏÔÊ¾¿Î³Ì------------------------
+//----------------------æ˜¾ç¤ºè¯¾ç¨‹------------------------
 router.get('/', function(req, res) {
     var result = {
         code: 0,
@@ -50,7 +50,7 @@ router.get('/', function(req, res) {
     });
 });
 
-//----------------------É¾³ı¿Î³Ì------------------------
+//----------------------åˆ é™¤è¯¾ç¨‹------------------------
 router.delete('/', function(req, res) {
     var course_id = ObjectId(req.query.course_id);
     var result = {
@@ -78,7 +78,7 @@ router.delete('/', function(req, res) {
     }
 });
 
-//----------------------¸üĞÂ¿Î³ÌÃû------------------------
+//----------------------æ›´æ–°è¯¾ç¨‹å------------------------
 router.put('/', function(req, res) {
     var course_id = ObjectId(req.body._id);
     var newName=req.body.newName;
@@ -101,7 +101,7 @@ router.put('/', function(req, res) {
     }
 });
 
-//----------------------ÏÔÊ¾¿Î³Ì½éÉÜ------------------------
+//----------------------æ˜¾ç¤ºè¯¾ç¨‹ä»‹ç»------------------------
 router.get('/:_id/intro', function(req, res) {
     var result = {
         code: 0,
@@ -125,7 +125,7 @@ router.get('/:_id/intro', function(req, res) {
     });
 });
 
-//----------------------ĞŞ¸Ä¿Î³Ì½éÉÜ------------------------
+//----------------------ä¿®æ”¹è¯¾ç¨‹ä»‹ç»------------------------
 router.put('/:_id/intro', function(req, res) {
     var result = {
         code: 0,
@@ -147,7 +147,7 @@ router.put('/:_id/intro', function(req, res) {
     }
 });
 
-//----------------------ÏÔÊ¾¿Î³Ì°²ÅÅ------------------------
+//----------------------æ˜¾ç¤ºè¯¾ç¨‹å®‰æ’------------------------
 router.get('/:_id/schedule', function(req, res) {
     var result = {
         code: 0,
@@ -171,7 +171,7 @@ router.get('/:_id/schedule', function(req, res) {
     });
 });
 
-//----------------------ĞŞ¸Ä¿Î³Ì°²ÅÅ------------------------
+//----------------------ä¿®æ”¹è¯¾ç¨‹å®‰æ’------------------------
 router.put('/:_id/schedule', function(req, res) {
     var result = {
         code: 0,
@@ -193,7 +193,7 @@ router.put('/:_id/schedule', function(req, res) {
     }
 });
 
-//----------------------ĞÂÔöÑ§Éú------------------------
+//----------------------æ–°å¢å­¦ç”Ÿ------------------------
 router.post('/:_id/students', function(req, res) {
     var result = {
         code: 0,
@@ -232,7 +232,7 @@ router.post('/:_id/students', function(req, res) {
     }
 });
 
-//----------------------É¾³ıÑ§Éú------------------------
+//----------------------åˆ é™¤å­¦ç”Ÿ------------------------
 router.delete('/:_id/students', function(req, res) {
     var course_id = ObjectId(req.params._id);
     var result = {
@@ -268,7 +268,7 @@ router.delete('/:_id/students', function(req, res) {
     }
 });
 
-//----------------------ÏÔÊ¾Ñ§Éú------------------------
+//----------------------æ˜¾ç¤ºå­¦ç”Ÿ------------------------
 router.get('/:_id/students', function(req, res) {
     var result = {
         code: 0,

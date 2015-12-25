@@ -80,5 +80,4 @@ router.delete('/:course_id', function(req, res) {
     res.json(result);
 });
 
-
 module.exports = router;

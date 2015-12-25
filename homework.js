@@ -280,8 +280,8 @@ router.put('/:course_id/:homework_id', function(req, res) {
         var timestamp = Date.now();
         var cursor = req.db.collection("submits").find(
             { "student_id":ObjectId(req.users._id),
-              "homework_id":homework_id,
-              "course_id":course_id
+                "homework_id":homework_id,
+                "course_id":course_id
             } );
         cursor.count().then(function(count) {
             if (count === 0) {

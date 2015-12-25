@@ -5,8 +5,8 @@ var loginCheck = require('./login-check');
 var courses = require('./courses');
 var posts = require('./posts');
 var homework = require("./homework");
-
 var app = express();
+
 app.use(dbInit);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(loginCheck);
 app.use('/courses', courses);
-app.use('/posts',posts);
+app.use('/posts', posts);
 app.use('/homework', homework);
 
 
