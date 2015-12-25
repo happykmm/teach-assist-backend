@@ -8,10 +8,15 @@ router.all('*', function(req, res, next) {
 
 
 function checkToken(req, res, next, token) {
+    if (!token) {
+        res.json({code: 1, desc: "Please login first!"});
+        return false;
+    }
     var cursor = req.db.collection('users').find({ token: token }).limit(1);
     cursor.each(function(err, doc) {
         if (err === null) {
             if (doc !== null) {
+                console.log(doc);
                 req.users = {
                     _id: doc._id,
                     type: doc.type,
