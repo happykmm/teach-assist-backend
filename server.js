@@ -10,10 +10,11 @@ var posts      = require('./posts');
 var homework   = require("./homework");
 var app        = express();
 
+var port = process.env.PORT || 8080;
 https.createServer({
     key: fs.readFileSync('certificates/server.key'),
     cert: fs.readFileSync('certificates/server.crt')
-}, app).listen(55555);
+}, app).listen(port);
 
 app.use(dbInit);
 // parse application/x-www-form-urlencoded
@@ -27,4 +28,4 @@ app.use('/posts', posts);
 app.use('/homework', homework);
 
 
-console.log('Magic happens on port 55555');
+console.log('Magic happens on port '+port);
