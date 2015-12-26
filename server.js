@@ -1,23 +1,30 @@
+var fs         = require('fs');
+var https      = require('https');
 var express    = require('express');
 var bodyParser = require('body-parser');
-var dbInit = require('./db-init');
+var dbInit     = require('./db-init');
 var loginCheck = require('./login-check');
-var courses = require('./courses');
-var posts = require('./posts');
-var homework = require("./homework");
-var app = express();
+var login      = require('./login');
+var courses    = require('./courses');
+var posts      = require('./posts');
+var homework   = require("./homework");
+var app        = express();
+
+https.createServer({
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+}, app).listen(55555);
 
 app.use(dbInit);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
 app.use(bodyParser.json());
+app.use('/login', login);
 app.use(loginCheck);
 app.use('/courses', courses);
 app.use('/posts', posts);
 app.use('/homework', homework);
 
 
-var port = process.env.PORT || 8080;
-app.listen(port);
-console.log('Magic happens on port ' + port);
+console.log('Magic happens on port 55555');
