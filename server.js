@@ -11,13 +11,16 @@ var posts      = require('./posts');
 var homework   = require("./homework");
 var app        = express();
 
+
+app.set("jwtTokenSecret", "Happy-Christmas");
+
 var port = process.env.PORT || 8080;
 https.createServer({
     key: fs.readFileSync('certificates/server.key'),
     cert: fs.readFileSync('certificates/server.crt')
 }, app).listen(port);
 
-app.set("jwtTokenSecret", "Happy-Christmas");
+
 app.use(dbInit);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
