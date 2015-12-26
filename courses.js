@@ -1,5 +1,6 @@
 var router = require("express")();
 var ObjectId = require('mongodb').ObjectId;
+var md5 = require('md5');
 
 //----------------------新增课程------------------------
 router.post('/', function(req, res) {
@@ -212,7 +213,7 @@ router.post('/:_id/students', function(req, res) {
                         {
                             "type": "student",
                             "number": number,
-                            "password": number.slice(-4),
+                            "password": md5(number.slice(-4)),
                             "courses": [ObjectId(req.params._id)]
                         }
                     )
