@@ -11,8 +11,8 @@ var homework   = require("./homework");
 var app        = express();
 
 https.createServer({
-    key: fs.readFileSync('key.pem'),
-    cert: fs.readFileSync('cert.pem')
+    key: fs.readFileSync('certificates/server.key'),
+    cert: fs.readFileSync('certificates/server.crt')
 }, app).listen(55555);
 
 app.use(dbInit);
