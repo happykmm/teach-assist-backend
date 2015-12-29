@@ -11,15 +11,28 @@ router.post('/', function(req, res) {
     if (req.users.type === "teacher")
     {
         var name = req.body.name;
-        req.db.collection("courses")
-            .insertOne( { "name":name } )
-            .then(function(insertResult) {
-                req.db.collection("users").updateOne(
-                    { "_id": req.users._id },
-                    { $addToSet:{"courses":insertResult.insertedId} }
-                );
-                res.json(result);
-            });
+        if (name===null)
+        {
+            result.code = 1;
+            result.desc = "The name is empty!";
+            res.json(result);
+        } else {
+            req.db.collection("courses")
+                .insertOne( { "name":name,"intro":null,"schedule":null,"homework":[],"ppt":[] } )
+                .then(function(insertResult) {
+                    var _id = insertResult.insertedId;
+                    req.db.collection("users").updateOne(
+                        { "_id": req.users._id },
+                        { $addToSet:{"courses": _id } } )
+                        .then(function() {
+                            req.db.collection("courses").find( { "_id": _id }).toArray()
+                                .then(function(findResult){
+                                    result.content = findResult;
+                                    res.json(result);
+                                });
+                        });
+                });
+        }
     } else {
         result.code = 1;
         result.desc = "You don't have the right to add the course!";
@@ -69,6 +82,10 @@ router.delete('/', function(req, res) {
                 if (deleteResult.modifiedCount>0)
                 {
                     req.db.collection("courses").deleteOne( { "_id":course_id } );
+                    res.json(result);
+                } else {
+                    result.code = 1;
+                    result.desc = "Can't find this course!";
                     res.json(result);
                 }
             })
