@@ -14,7 +14,7 @@ router.post('/', function(req, res) {
         if (name===null)
         {
             result.code = 1;
-            result.desc = "The name is empty!";
+            result.desc = "Course name is empty!";
             res.json(result);
         } else {
             req.db.collection("courses")
@@ -35,7 +35,7 @@ router.post('/', function(req, res) {
         }
     } else {
         result.code = 1;
-        result.desc = "You don't have the right to add the course!";
+        result.desc = "Permission denied";
         res.json(result);
     }
 });
@@ -44,29 +44,24 @@ router.post('/', function(req, res) {
 router.get('/', function(req, res) {
     var result = {
         code: 0,
-        desc: "success!",
-        content: []
+        desc: "success!"
     };
-    var cursor = req.db.collection("courses").find( { _id: { $in : req.users.courses } } );
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                result.content.push(doc);
-            } else {
-                res.json(result);
-            }
-        } else {
+    req.db.collection("courses").
+        find( { _id: { $in : req.users.courses } }).
+        toArray().then(function(docs) {
+            result.content = docs;
+            res.json(result);
+        }, function(err) {
             result.code = 1;
             result.desc = err.toString();
             res.json(result);
-            return false;
-        }
-    });
+        });
 });
 
 //----------------------删除课程------------------------
 router.delete('/', function(req, res) {
-    var course_id = ObjectId(req.query.course_id);
+    console.log(req.query);
+    var course_id = ObjectId(req.query._id);
     var result = {
         code: 0,
         desc: "success!"
@@ -91,7 +86,7 @@ router.delete('/', function(req, res) {
             })
     } else {
         result.code = 1;
-        result.desc = "You don't have the right to delete the course!";
+        result.desc = "Permission denied";
         res.json(result);
     }
 });
@@ -99,7 +94,7 @@ router.delete('/', function(req, res) {
 //----------------------更新课程名------------------------
 router.put('/', function(req, res) {
     var course_id = ObjectId(req.body._id);
-    var newName=req.body.newName;
+    var newName = req.body.name;
     var result = {
         code: 0,
         desc: "success!"
@@ -114,33 +109,35 @@ router.put('/', function(req, res) {
         res.json(result);
     } else {
         result.code = 1;
-        result.desc = "You don't have the right to update the course!";
+        result.desc = "Permission denied";
         res.json(result);
     }
 });
 
 //----------------------显示课程介绍------------------------
 router.get('/:_id/intro', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!",
-        content: []
-    };
-    var cursor = req.db.collection("courses").find( { _id:ObjectId(req.params._id) } );
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                result.content.push(doc.intro);
+    req.db.collection("courses").
+        find( { _id:ObjectId(req.params._id) }).
+        toArray().
+        then(function(docs) {
+            if (docs.length > 0) {
+                res.json({
+                    code: 0,
+                    desc: "success!",
+                    intro: docs[0].intro
+                });
             } else {
-                res.json(result);
+                res.json({
+                    code: 1,
+                    desc: "Invalid course_id!"
+                });
             }
-        } else {
-            result.code = 1;
-            result.desc = err.toString();
-            res.json(result);
-            return false;
-        }
-    });
+        }, function(err) {
+            res.json({
+                code: 1,
+                desc: err.toString()
+            })
+        });
 });
 
 //----------------------修改课程介绍------------------------
@@ -166,38 +163,39 @@ router.put('/:_id/intro', function(req, res) {
 });
 
 //----------------------显示课程安排------------------------
-router.get('/:_id/schedule', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!",
-        content: []
-    };
-    var cursor = req.db.collection("courses").find( { _id:ObjectId(req.params._id) } );
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                result.content.push(doc.schedule);
+router.get('/:_id/sched', function(req, res) {
+    req.db.collection("courses").
+        find( { _id:ObjectId(req.params._id) }).
+        toArray().then(function(docs) {
+            if (docs.length > 0) {
+                res.json({
+                    code: 0,
+                    desc: "success",
+                    sched: docs[0].schedule
+                })
             } else {
-                res.json(result);
+                res.json({
+                    code: 1,
+                    desc: "Invalid course id!"
+                });
             }
-        } else {
-            result.code = 1;
-            result.desc = err.toString();
-            res.json(result);
-            return false;
-        }
-    });
+        }, function(err) {
+            res.json({
+                code: 1,
+                desc: err.toString()
+            });
+        });
 });
 
 //----------------------修改课程安排------------------------
-router.put('/:_id/schedule', function(req, res) {
+router.put('/:_id/sched', function(req, res) {
     var result = {
         code: 0,
         desc: "success!"
     };
     if (req.users.type === "teacher")
     {
-        var schedule = req.body.schedule;
+        var schedule = req.body.sched;
         req.db.collection("courses").updateOne
         (
             { "_id": ObjectId(req.params._id) },
@@ -245,7 +243,7 @@ router.post('/:_id/students', function(req, res) {
         res.json(result);
     } else {
         result.code = 1;
-        result.desc = "You don't have the right to add students to this course!";
+        result.desc = "Permission denied";
         res.json(result);
     }
 });
@@ -288,30 +286,21 @@ router.delete('/:_id/students', function(req, res) {
 
 //----------------------显示学生------------------------
 router.get('/:_id/students', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!",
-        content: []
-    };
     var course_id = ObjectId(req.params._id);
-    var cursor = req.db.collection("users").find( { "courses" : {$in:[course_id]} } );
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                if (doc.type === "student") {
-                    result.content.push(doc.number);
-                    result.content.push(doc.realname);
-                }
-            } else {
-                res.json(result);
-            }
-        } else {
-            result.code = 1;
-            result.desc = err.toString();
-            res.json(result);
-            return false;
-        }
-    });
+    req.db.collection("users").
+        find( { courses: course_id, type: "student"}).
+        toArray().then(function(docs) {
+            res.json({
+                code: 0,
+                desc: "success!",
+                content: docs
+            });
+        }, function(err) {
+            res.json({
+                code: 1,
+                desc: err.toString()
+            })
+        });
 });
 
 module.exports = router;
