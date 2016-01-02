@@ -211,95 +211,103 @@ router.put('/:_id/sched', function(req, res) {
 
 //----------------------新增学生------------------------
 router.post('/:_id/students', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    if (req.users.type === "teacher")
-    {
-        var students_list = req.body.students;
-        var students_set = students_list.split(',');
-        students_set.forEach(function(number)
-        {
-            var cursor = req.db.collection("users").find( { "number" : number } );
-            cursor.count().then(function(count) {
-                if (count === 0) {
-                    req.db.collection("users").insertOne(
-                        {
-                            "type": "student",
-                            "number": number,
-                            "password": md5(number.slice(-4)),
-                            "courses": [ObjectId(req.params._id)]
-                        }
-                    )
-                } else {
-                    req.db.collection("users").updateOne(
-                        { "number" : number },
-                        { $addToSet:{"courses":ObjectId(req.params._id)} }
-                    );
-                }
-            });
-        });
-        res.json(result);
-    } else {
-        result.code = 1;
-        result.desc = "Permission denied";
-        res.json(result);
+    if (req.users.type !== "teacher") {
+        res.json({code:1, desc:"Permission denied"});
     }
+    var course_id = ObjectId(req.params._id);
+    var students = req.body.students;
+    if (typeof students !== "object") {
+        res.json({code:1, desc:"Illegal parameters!"});
+    }
+    var result = {code:0, desc:"success!", students: []};
+    var todoCount = students.length;
+    function todoMinus() {
+        todoCount--;
+        if (todoCount === 0) {
+            res.json(result);
+        }
+    }
+    students.forEach(function(number) {
+        req.db.collection("users").findOneAndUpdate(
+            { "number" : number },
+            { $addToSet:{"courses": course_id} }
+        ).then(function(updateResult) {
+            if (updateResult.value !== null) {
+                result.students.push({
+                    _id: updateResult.value._id,
+                    number: updateResult.value.number,
+                    realname: updateResult.value.realname
+                });
+                todoMinus();
+                return;
+            }
+            req.db.collection("users").insertOne({
+                type: "student",
+                number: number,
+                password: md5(number.slice(-4)),
+                courses: [ course_id ]
+            }).then(function(insertResult) {
+                var newStudent = insertResult.ops[0];
+                result.students.push({
+                    _id: newStudent._id,
+                    number: newStudent.number,
+                    realname: newStudent.realname
+                });
+                todoMinus();
+            }, function(err) {
+                res.json({code:1, desc:err.toString()});
+            })
+        }, function(err) {
+            res.json({code:1, desc:err.toString()});
+        });
+    });
+
 });
 
 //----------------------删除学生------------------------
 router.delete('/:_id/students', function(req, res) {
-    var course_id = ObjectId(req.params._id);
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    if (req.users.type === "teacher")
-    {
-        var cursor = req.db.collection("users").find( { "courses" : {$in:[course_id]} } );
-        cursor.each(function(err, doc) {
-            if (err === null) {
-                if (doc !== null) {
-                    if (doc.type === "student") {
-                        req.db.collection("users").updateOne(
-                            { "_id": ObjectId(doc._id) },
-                            { $pull:{"courses":course_id} }
-                        )
-                    }
-                } else {
-                    res.json(result);
-                }
-            } else {
-                result.code = 1;
-                result.desc = err.toString();
-                res.json(result);
-                return false;
-            }
-        });
-    } else {
-        result.code = 1;
-        result.desc = "You don't have the right to delete students from this course!";
-        res.json(result);
+    if (req.users.type !== "teacher") {
+        res.json({code: 1, desc: "Permission denied!"});
+        return false;
     }
+    var course_id = ObjectId(req.params._id);
+    var students = req.query.students;
+    if (typeof students === "string")
+        students = [students];
+    if (typeof students !== "object") {
+        res.json({code: 1, desc: "Illegal parameters!"});
+        return false;
+    }
+    students = students.map(function(_id) {
+        return ObjectId(_id);
+    });
+    req.db.collection("users").
+        updateMany(
+            { _id: {$in: students}, type:"student" },
+            { $pull: {courses: course_id}}
+        ).then(function(result) {
+            res.json({
+                code: 0,
+                desc: "success",
+                matchedCount: result.matchedCount,
+                modifiedCount: result.modifiedCount
+            })
+        }, function(err) {
+            res.json({code: 1, desc: err.toString()});
+        });
 });
 
 //----------------------显示学生------------------------
 router.get('/:_id/students', function(req, res) {
     var course_id = ObjectId(req.params._id);
     req.db.collection("users").
-        find( { courses: course_id, type: "student"}).
-        toArray().then(function(docs) {
-            res.json({
-                code: 0,
-                desc: "success!",
-                content: docs
-            });
+        find(
+            { courses: course_id, type: "student"},
+            { _id: 1, number: 1, realname: 1 }
+        ).toArray().then(function(docs) {
+            res.json({code: 0, desc: "success!", students: docs});
         }, function(err) {
-            res.json({
-                code: 1,
-                desc: err.toString()
-            })
+            res.json({code: 1, desc: err.toString()})
         });
 });
 
