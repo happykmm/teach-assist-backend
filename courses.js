@@ -2,6 +2,23 @@ var router = require("express")();
 var ObjectId = require('mongodb').ObjectId;
 var md5 = require('md5');
 
+//---------------------防止越权------------------------
+router.all('/:_id/*', function(req, res, next) {
+    var isMatch = false;
+    req.users.courses.forEach(function(course_id) {
+        if (course_id.equals(req.params._id)) {
+            isMatch = true;
+            return false;
+        }
+    });
+    if (!isMatch) {
+        res.json({code:1, desc:"Permission denied!"});
+        return false;
+    }
+    next();
+});
+
+
 //----------------------新增课程------------------------
 router.post('/', function(req, res) {
     var result = {

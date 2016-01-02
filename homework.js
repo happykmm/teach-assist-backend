@@ -1,7 +1,7 @@
 var router = require("express")();
 var ObjectId = require('mongodb').ObjectId;
 
-//----------------------新增作业------------------------
+//----------------------鏂板浣滀笟------------------------
 router.post('/:course_id', function(req, res) {
     var result = {
         code: 0,
@@ -28,7 +28,7 @@ router.post('/:course_id', function(req, res) {
     }
 });
 
-//----------------------显示作业------------------------
+//----------------------鏄剧ず浣滀笟------------------------
 router.get('/:course_id', function(req, res) {
     var result = {
         code: 0,
@@ -66,7 +66,7 @@ router.get('/:course_id', function(req, res) {
     });
 });
 
-//----------------------删除作业------------------------
+//----------------------鍒犻櫎浣滀笟------------------------
 router.delete('/:course_id', function(req, res) {
     var result = {
         code: 0,
@@ -94,7 +94,7 @@ router.delete('/:course_id', function(req, res) {
     }
 });
 
-//----------------------更新作业------------------------
+//----------------------鏇存柊浣滀笟------------------------
 router.put('/:course_id', function(req, res) {
     var homework_id = ObjectId(req.body._id);
     var title = req.body.title;
@@ -132,7 +132,7 @@ router.put('/:course_id', function(req, res) {
     }
 });
 
-//-----------------学生显示题目--老师显示学生答案------------------
+//-----------------瀛︾敓鏄剧ず棰樼洰--鑰佸笀鏄剧ず瀛︾敓绛旀------------------
 router.get('/:course_id/:homework_id', function(req, res) {
     var result = {
         code: 0,
@@ -257,7 +257,7 @@ router.get('/:course_id/:homework_id', function(req, res) {
 //    }
 //});
 
-//-----------------学生提交答案--老师评分------------------
+//-----------------瀛︾敓鎻愪氦绛旀--鑰佸笀璇勫垎------------------
 router.put('/:course_id/:homework_id', function(req, res) {
     var result = {
         code: 0,
