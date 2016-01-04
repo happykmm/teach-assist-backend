@@ -4,6 +4,7 @@ var dbInit = require('./db-init');
 var loginCheck = require('./login-check');
 var courses = require('./courses');
 var posts = require('./posts');
+var replies = require('./replies');
 
 var app        = express();
 app.use(dbInit);
