@@ -93,7 +93,7 @@ router.put('/:course_id', function(req, res) {
     else{
         var promise = req.db.collection("posts").updateOne
         (
-            { "_id":ObjectId(id)},
+            { "_id":ObjectId(course_id)},
             { $set:{ "title":newtitle,"content":newcontent} }
         );
     }
