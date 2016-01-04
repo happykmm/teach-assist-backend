@@ -74,7 +74,7 @@ router.post('/:course_id/:post_id',function(req,res){
         res.json(result);
     }
 });
-
+asdasdasd
 
 //-----------------------修改post_id号帖子的一个回复-----------------------------
 router.put('/:course_id/:post_id',function(req,res){
@@ -82,7 +82,7 @@ router.put('/:course_id/:post_id',function(req,res){
         code: 0,
         desc: "success!"
     };
-    var course_id = req.body.course_id;
+    var course_id = req.params.course_id;
     var newtitle = req.body.title;
     var newcontent = req.body.content;
     if(newcontent===null)
