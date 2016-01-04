@@ -1,50 +1,54 @@
 var router = require("express")();
+var jwt = require('jwt-simple');
+var ObjectId = require('mongodb').ObjectId;
 
-//Allow CORS
+
 router.all('*', function(req, res, next) {
-    res.set('Access-Control-Allow-Origin', '*');
-    next();
-});
-
-
-function checkToken(req, res, next, token) {
-    var cursor = req.db.collection('users').find({ token: token }).limit(1);
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                req.users = {
-                    _id: doc._id,
-                    type: doc.type,
-                    number: doc.number,
-                    realname: doc.realname,
-                    intro: doc.intro,
-                    courses: doc.courses
+    var token = (req.body && req.body.token)
+             || (req.query && req.query.token)
+             || req.headers['x-access-token'];
+    if (!token) {
+        res.json({code: 1, desc: "Please login first!"});
+        return false;
+    }
+    try {
+        var decoded = jwt.decode(token, req.app.get('jwtTokenSecret'));
+        console.log("jwt decoded: ");
+        console.log(decoded);
+        if (decoded.exp <= Date.now()) {
+            res.json({code: 3, desc: "Session expired, please login again"});
+            return false;
+        } else {
+            req.db.collection("users").find({
+                _id: ObjectId(decoded.iss)
+            }).toArray().then(function(users) {
+                if (users.length > 0) {
+                    req.users = {
+                        _id: users[0]._id,
+                        type: users[0].type,
+                        number: users[0].number,
+                        realname: users[0].realname,
+                        intro: users[0].intro,
+                        courses: users[0].courses || []
+                    };
+                    next();
+                } else {
+                    res.json({code:5, desc:"User not exist, please login again"});
+                    return false;
                 }
-                next();
+            }, function(err) {
+                res.json({code:4, desc: err.toString()});
                 return false;
-            } else
-                res.json({ code: 1, desc: "Please Login first!" });
-        } else
-            res.json({ code: 1, desc: "Internal Server Error!" });
-
-    });
-}
-
-
-router.get('*', function(req, res, next) {
-    checkToken(req, res, next, req.query.token);
+            })
+        }
+    } catch (err) {
+        console.log("jwt decode error: ");
+        console.log(err);
+        res.json({code: 2, desc: "Invalid credential!"});
+        return false;
+    }
 });
 
-router.post('*', function(req, res, next) {
-    checkToken(req, res, next, req.body.token);
-});
 
-router.put('*', function(req, res, next) {
-    checkToken(req, res, next, req.body.token);
-});
-
-router.delete('*', function(req, res, next) {
-    checkToken(req, res, next, req.query.token);
-});
 
 module.exports = router;
