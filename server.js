@@ -12,6 +12,7 @@ var homework   = require("./homework");
 var ppt        = require("./ppt");
 var qiniu      = require("./qiniu");
 var replies    = require("./replies");
+var self       = require("./self");
 var app        = express();
 
 
@@ -38,6 +39,6 @@ app.use('/courses', courses);
 app.use('/posts', posts);
 app.use('/homework', homework);
 app.use('/ppt', ppt);
-
+app.use('/self', self);
 
 console.log('Magic happens on port '+port);
