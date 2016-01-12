@@ -1,6 +1,6 @@
 var router = require('express')();
 
-router.post('up', function(req, res) {
+router.all('up', function(req, res) {
     console.log("callback here!!");
 });
 
