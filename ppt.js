@@ -9,7 +9,7 @@ router.get('/token', function(req, res) {
     var putPolicy = new qiniu.rs.PutPolicy("tasystem");
     //putPolicy.expires = 3600;
     putPolicy.callbackUrl = "https://teachassist.xyz:8080/qiniu/up";
-    putPolicy.callbackBody = "name=$(fname)&hash=$(etag)";
+    putPolicy.callbackBody = "filename=$(fname)&storename=$(key)&course_id=$(x:course_id)";
     console.log(putPolicy);
     res.json({code:0, token:putPolicy.token()});
 });
