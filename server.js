@@ -9,8 +9,9 @@ var login      = require('./login');
 var courses    = require('./courses');
 var posts      = require('./posts');
 var homework   = require("./homework");
-var ppt         = require("./ppt");
-var replies = require("./replies");
+var ppt        = require("./ppt");
+var qiniu      = require("./qiniu");
+var replies    = require("./replies");
 var app        = express();
 
 
@@ -31,6 +32,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(CORS);
 app.use('/login', login);
+app.use('/qiniu', qiniu);
 app.use(loginCheck);
 app.use('/courses', courses);
 app.use('/posts', posts);
