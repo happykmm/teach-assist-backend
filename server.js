@@ -10,6 +10,7 @@ var courses    = require('./courses');
 var posts      = require('./posts');
 var homework   = require("./homework");
 var ppt         = require("./ppt");
+var replies = require("./replies");
 var app        = express();
 
 

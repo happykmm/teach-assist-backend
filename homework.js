@@ -3,95 +3,84 @@ var ObjectId = require('mongodb').ObjectId;
 
 //----------------------新增作业------------------------
 router.post('/:course_id', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    if (req.users.type === "teacher")
-    {
-        var title = req.body.title;
-        var problem = req.body.problem;
-        var deadline = req.body.deadline;
-        req.db.collection("homework")
-            .insertOne( { "title":title, "problem":problem, "deadline":deadline } )
-            .then(function(insertResult) {
-                req.db.collection("courses").updateOne(
-                    { "_id": ObjectId(req.params.course_id) },
-                    { $addToSet:{"homework":insertResult.insertedId} }
-                );
-                res.json(result);
-            });
-    } else {
-        result.code = 1;
-        result.desc = "You don't have the right to add the homework!";
-        res.json(result);
+    if (req.users.type !== "teacher") {
+        res.json({code: 1, desc: "Permission denied!"});
+        return false;
     }
+    var title = req.body.title;
+    var problem = req.body.problem;
+    var deadline = req.body.deadline;
+    var strict = !!req.body.strict;
+    if (!title || !problem || !deadline) {
+        res.json({code: 1, desc: "Invalid parameters"});
+        return false;
+    }
+    req.db.collection("homework")
+        .insertOne( { title: title, problem: problem, deadline: deadline, strict: strict } )
+        .then(function(insertResult) {
+            console.log(insertResult);
+            req.db.collection("courses").updateOne(
+                { _id: ObjectId(req.params.course_id) },
+                { $addToSet:{homework: insertResult.insertedId} }
+            ).then(function(updateResult) {
+                    res.json({code: 0, content: insertResult.ops});
+                }, function(err) {
+                    res.json({code: 1, desc: err.toString()});
+                });
+        }, function(err) {
+            res.json({code: 1, desc: err.toString()});
+        });
 });
 
 //----------------------显示作业------------------------
 router.get('/:course_id', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!",
-        content: []
-    };
-    var homework_set = [];
-    var course = req.db.collection("courses").find( { _id:ObjectId(req.params.course_id) } );
-    course.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                homework_set = doc.homework;
-                var cursor = req.db.collection("homework").find( { _id: { $in : homework_set } } );
-                cursor.each(function(errr, docc) {
-                    if (errr === null) {
-                        if (docc !== null) {
-                            result.content.push(docc);
-                        }
-                    } else {
-                        result.code = 1;
-                        result.desc = errr.toString();
-                        res.json(result);
-                        return false;
-                    }
-                });
-            } else {
-                res.json(result);
-            }
-        } else {
-            result.code = 1;
-            result.desc = err.toString();
-            res.json(result);
-            return false;
-        }
-    });
+    try {
+        var course_id = ObjectId(req.params.course_id);
+    } catch(err) {
+        res.json({code:1, desc:"Invalid course id!"});
+    }
+    req.db.collection("courses")
+        .find( { _id: course_id } )
+        .toArray().then(function(courses) {
+            var homeworkIds = courses[0].homework;
+            req.db.collection("homework")
+                .find( { _id: { $in : homeworkIds } } )
+                .toArray().then(function(homework) {
+                    res.json({code:0, desc:"success", homework:homework});
+                }, function(err) {
+                    res.json({code:1, desc:err.toString()});
+                })
+        }, function(err) {
+            res.json({code:1, desc:err.toString()});
+        });
 });
 
 //----------------------删除作业------------------------
 router.delete('/:course_id', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    var homework_id = ObjectId(req.query._id);
-    if (req.users.type === "teacher")
-    {
-        req.db.collection("courses")
-            .updateOne(
-            { "_id": ObjectId(req.params.course_id) },
-            { $pull:{"homework":homework_id} }
-            )
-            .then(function (deleteResult) {
-                if (deleteResult.modifiedCount>0)
-                {
-                    req.db.collection("homework").deleteOne( { "_id":homework_id } );
-                    res.json(result);
-                }
-            })
-    } else {
-        result.code = 1;
-        result.desc = "You don't have the right to delete the homework!";
-        res.json(result);
+    if (req.users.type !== "teacher") {
+        res.json({code:1, desc:'Permission denied!'});
+        return false;
     }
+    try {
+        var course_id = ObjectId(req.params.course_id);
+        var homework_id = ObjectId(req.query.homework_id);
+    } catch(err) {
+        res.json({code:1, desc:"Invalid parameters!"});
+    }
+
+    req.db.collection("courses")
+        .updateOne(
+            { "_id": course_id },
+            { $pull: {"homework":homework_id} }
+        ).then(function (deleteResult) {
+            if (deleteResult.modifiedCount>0) {
+                req.db.collection("homework")
+                    .deleteOne( { "_id":homework_id } );
+            }
+            res.json({code: 0});
+        }, function(err) {
+            res.json({code:1, desc:err.toString()});
+        })
 });
 
 //----------------------更新作业------------------------

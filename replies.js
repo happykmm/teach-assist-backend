@@ -1,19 +1,18 @@
 /**
- * Created by WC on 2015/12/21.
- */
-/**
- *  req.params.course_id
+ * Created by wc on 2015/12/24.
  */
 var router = require("express")();
-var ObjectId = require('mongodb').ObjectId;
+var ObejectId = require("mongodb").ObjectId;
 
-router.get('/:course_id', function(req, res) {
+
+//-----------------------获取某课程某帖子的所有回复------------------------------
+router.get('/:course_id/:post_id',function(req,res){
     var result = {
         code: 0,
-        desc: "success!",
+        desc: "success",
         content: []
     };
-    var cursor = req.db.collection("posts").find( { course_id:req.params.course_id} );
+    var cursor = req.db.collection("posts").find( { course_id:req.params.course_id, post_id:req.params.post_id} );
     cursor.each(function(err, doc) {
         if (err === null) {
             if (doc !== null) {
@@ -31,32 +30,32 @@ router.get('/:course_id', function(req, res) {
 });
 
 
-router.post('/:course_id', function(req, res) {
+//-----------------------存储回复post_id号帖子---------------------------------------
+router.post('/:course_id/:post_id',function(req,res){
+    var result = {
+        code: 0,
+        desc: "success!"
+    };
     var user_id = req.body.user_id;
     var user_name = req.body.user_name;
     var course_id = req.params.course_id;
-    var title = req.body.title;
+    var title = null;
     var content = req.body.content;
     var timestamp = Date.now();
-    var parent = 0;
+    var parent = req.params.post_id;
     var count_read = 0;
     var count_zan = 0;
-    var top = req.body.top;
-    var result = {
-        code: 0,
-        desc: "success!",
-        content:[]
-    };
-    if(title===null || content ===null)
+    var top = 0;
+    if(content===null)
     {
         result.code = 1;
-        result.desc = "There is no title or no content!";
+        result.desc = "There is no content!";
         res.json(result);
     }
     else{
         req.db.collection("posts").insertOne( { "user_id":user_id,"user_name":user_name,
-            "course_id":course_id,"title":title,"content":content,"timestamp":timestamp,"parent":parent,
-            "count_read":count_read,"count_zan":count_zan,"top":top}).then(function(insertResult){
+            "course_id":course_id,"title":title,"content":content,"timestamp":timestamp,
+            "parent":parent,"count_read":count_read,"count_zan":count_zan,"top":top} ).then(function(insertResult){
             var newpost = insertResult.ops[0];
             result.content.push({
                 _id: newpost._id,
@@ -65,7 +64,7 @@ router.post('/:course_id', function(req, res) {
                 course_id: newpost.course_id,
                 title: newpost.title,
                 content: newpost.content,
-                timestamp:newpost.timestamp,
+                tiuemstamp:newpost.timestamp,
                 parent:newpost.parent,
                 count_read:newpost.count_read,
                 count_zan:newpost.count_zan,
@@ -76,18 +75,20 @@ router.post('/:course_id', function(req, res) {
     }
 });
 
-router.put('/:course_id', function(req, res) {
-    var course_id = req.body.course_id;
-    var newtitle = req.body.title;
-    var newcontent = req.body.content;
+
+//-----------------------修改post_id号帖子的一个回复-----------------------------
+router.put('/:course_id/:post_id',function(req,res){
     var result = {
         code: 0,
         desc: "success!"
     };
-    if(newtitle===null || newcontent ===null)
+    var course_id = req.params.course_id;
+    var newtitle = req.body.title;
+    var newcontent = req.body.content;
+    if(newcontent===null)
     {
         result.code = 1;
-        result.desc = "There is no update title or no update content!";
+        result.desc = "There is no update content!";
         res.json(result);
     }
     else{
@@ -100,7 +101,9 @@ router.put('/:course_id', function(req, res) {
     res.json(result);
 });
 
-router.delete('/:course_id', function(req, res) {
+
+//-----------------------删除post_id号的帖子的一个回复---------------------------
+router.delete('/:course_id/:post_id',function(req,res){
     var id=req.query.post_id;
     var result = {
         code: 0,
@@ -108,9 +111,7 @@ router.delete('/:course_id', function(req, res) {
     };
     req.db.collection("posts").deleteOne( { "_id":ObjectId(req.query.post_id) }).
         then(function(err)
-            {res.json({code:1, desc:err.toString()})}
+                {res.json({code:1, desc:err.toString()})}
     );
     res.json(result);
 });
-
-module.exports = router;

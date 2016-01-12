@@ -12,7 +12,7 @@ router.all('/:_id/*', function(req, res, next) {
         }
     });
     if (!isMatch) {
-        res.json({code:1, desc:"Permission denied!"});
+        res.json({code:1, desc:"Invalid course id!"});
         return false;
     }
     next();
@@ -21,40 +21,37 @@ router.all('/:_id/*', function(req, res, next) {
 
 //----------------------新增课程------------------------
 router.post('/', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    if (req.users.type === "teacher")
-    {
-        var name = req.body.name;
-        if (name===null)
-        {
-            result.code = 1;
-            result.desc = "Course name is empty!";
-            res.json(result);
-        } else {
-            req.db.collection("courses")
-                .insertOne( { "name":name,"intro":null,"schedule":null,"homework":[],"ppt":[] } )
-                .then(function(insertResult) {
-                    var _id = insertResult.insertedId;
-                    req.db.collection("users").updateOne(
-                        { "_id": req.users._id },
-                        { $addToSet:{"courses": _id } } )
-                        .then(function() {
-                            req.db.collection("courses").find( { "_id": _id }).toArray()
-                                .then(function(findResult){
-                                    result.content = findResult;
-                                    res.json(result);
-                                });
-                        });
-                });
-        }
-    } else {
-        result.code = 1;
-        result.desc = "Permission denied";
-        res.json(result);
+    if (req.users.type !== "teacher") {
+        res.json({code:1, desc:"Permission denied!"});
+        return false;
     }
+    var name = req.body.name;
+    if (!name) {
+        res.json({code:1, desc:"Invalid parameters"});
+        return false;
+    }
+    req.db.collection("courses")
+        .insertOne({
+            name: name,
+            teacher: req.users.realname,
+            intro: null,
+            schedule: null,
+            homework: [],
+            ppt:[]
+        }).then(function(insertResult) {
+            var course_id = insertResult.insertedId;
+            req.db.collection("users").findOneAndUpdate(
+                { "_id": req.users._id },
+                { $addToSet:{"courses": course_id } } )
+                .then(function() {
+                    console.log(insertResult.ops);
+                    res.json({code:0, content:insertResult.ops});
+                }, function(err) {
+                    res.json({code:1, desc:err.toString()});
+                });
+        });
+
+
 });
 
 //----------------------显示课程------------------------
