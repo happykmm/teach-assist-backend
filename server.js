@@ -9,6 +9,7 @@ var login      = require('./login');
 var courses    = require('./courses');
 var posts      = require('./posts');
 var homework   = require("./homework");
+var replies = require("./replies");
 var app        = express();
 
 
