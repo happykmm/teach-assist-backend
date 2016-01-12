@@ -8,22 +8,19 @@ router.post('/up', function(req, res) {
     } catch(err) {
         res.json({code:1, desc:"Invalid course_id"});
     }
+    var newRecord = {
+        filename: req.body.filename,
+        storename: req.body.storename,
+        timestamp: moment().unix()
+    };
     req.db.collection("courses")
         .findOneAndUpdate(
             {_id: course_id},
-            {$addToSet: {ppt: {
-                filename: req.body.filename,
-                storename: req.body.storename,
-                timestamp: moment().unix()
-            }}}
+            {$addToSet: {ppt: newRecord}}
         ).then(function(updateResult) {
-            console.log(updateResult);
-            res.json({
-                code: 0,
-                name: req.body.name
-            });
+            res.json({code: 0, content: [newRecord] });
         }, function(err) {
-            res.json({code:1, desc:err.toString()});
+            res.json({code: 1, desc: err.toString()});
         })
 
 });
