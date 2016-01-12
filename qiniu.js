@@ -9,7 +9,7 @@ router.post('/up', function(req, res) {
         res.json({code:1, desc:"Invalid course_id"});
     }
     req.db.collection("courses")
-        .findAndUpdate(
+        .findOneAndUpdate(
             {_id: course_id},
             {$addToSet: {ppt: {
                 filename: req.body.filename,
