@@ -5,7 +5,7 @@ var router = require("express")();
 var ObejectId = require("mongodb").ObjectId;
 
 
-//-----------------------»ñÈ¡Ä³¿Î³ÌÄ³Ìû×ÓµÄËùÓĞ»Ø¸´------------------------------
+//-----------------------è·å–æŸè¯¾ç¨‹æŸå¸–å­çš„æ‰€æœ‰å›å¤------------------------------
 router.get('/:course_id/:post_id',function(req,res){
     var result = {
         code: 0,
@@ -30,7 +30,7 @@ router.get('/:course_id/:post_id',function(req,res){
 });
 
 
-//-----------------------´æ´¢»Ø¸´post_idºÅÌû×Ó---------------------------------------
+//-----------------------å­˜å‚¨å›å¤post_idå·å¸–å­---------------------------------------
 router.post('/:course_id/:post_id',function(req,res){
     var result = {
         code: 0,
@@ -76,7 +76,7 @@ router.post('/:course_id/:post_id',function(req,res){
 });
 
 
-//-----------------------ĞŞ¸Äpost_idºÅÌû×ÓµÄÒ»¸ö»Ø¸´-----------------------------
+//-----------------------ä¿®æ”¹post_idå·å¸–å­çš„ä¸€ä¸ªå›å¤-----------------------------
 router.put('/:course_id/:post_id',function(req,res){
     var result = {
         code: 0,
@@ -102,7 +102,7 @@ router.put('/:course_id/:post_id',function(req,res){
 });
 
 
-//-----------------------É¾³ıpost_idºÅµÄÌû×ÓµÄÒ»¸ö»Ø¸´---------------------------
+//-----------------------åˆ é™¤post_idå·çš„å¸–å­çš„ä¸€ä¸ªå›å¤---------------------------
 router.delete('/:course_id/:post_id',function(req,res){
     var id=req.query.post_id;
     var result = {
