@@ -9,7 +9,9 @@ var login      = require('./login');
 var courses    = require('./courses');
 var posts      = require('./posts');
 var homework   = require("./homework");
+var ppt         = require("./ppt");
 var app        = express();
+
 
 
 app.set("jwtTokenSecret", "Happy-Christmas");
@@ -32,6 +34,7 @@ app.use(loginCheck);
 app.use('/courses', courses);
 app.use('/posts', posts);
 app.use('/homework', homework);
+app.use('/ppt', ppt);
 
 
 console.log('Magic happens on port '+port);
