@@ -12,7 +12,7 @@ router.all('/:_id/*', function(req, res, next) {
         }
     });
     if (!isMatch) {
-        res.json({code:1, desc:"Permission denied!"});
+        res.json({code:1, desc:"Invalid course id!"});
         return false;
     }
     next();

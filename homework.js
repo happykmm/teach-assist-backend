@@ -34,8 +34,13 @@ router.post('/:course_id', function(req, res) {
 
 //----------------------显示作业------------------------
 router.get('/:course_id', function(req, res) {
+    try {
+        var course_id = ObjectId(req.params.course_id);
+    } catch(err) {
+        res.json({code:1, desc:"Invalid course id!"});
+    }
     req.db.collection("courses")
-        .find( { _id: ObjectId(req.params.course_id) } )
+        .find( { _id: course_id } )
         .toArray().then(function(courses) {
             var homeworkIds = courses[0].homework;
             req.db.collection("homework")
@@ -48,7 +53,6 @@ router.get('/:course_id', function(req, res) {
         }, function(err) {
             res.json({code:1, desc:err.toString()});
         });
-
 });
 
 //----------------------删除作业------------------------
@@ -57,15 +61,17 @@ router.delete('/:course_id', function(req, res) {
         res.json({code:1, desc:'Permission denied!'});
         return false;
     }
-    if (!req.query.homework_id) {
-        req.json({code:1, desc:'Invalid parameters'});
-        return false;
+    try {
+        var course_id = ObjectId(req.params.course_id);
+        var homework_id = ObjectId(req.query.homework_id);
+    } catch(err) {
+        res.json({code:1, desc:"Invalid parameters!"});
     }
-    var homework_id = ObjectId(req.query.homework_id);
+
     req.db.collection("courses")
         .updateOne(
-            { "_id": ObjectId(req.params.course_id) },
-            { $pull:{"homework":homework_id} }
+            { "_id": course_id },
+            { $pull: {"homework":homework_id} }
         ).then(function (deleteResult) {
             if (deleteResult.modifiedCount>0) {
                 req.db.collection("homework")
