@@ -10,6 +10,7 @@ router.get('/token', function(req, res) {
     //putPolicy.expires = 3600;
     putPolicy.callbackUrl = "https://teachassist.xyz:8080/qiniu/up";
     putPolicy.callbackBody = "$(fname)";
+    console.log(putPolicy);
     res.json({code:0, token:putPolicy.token()});
 });
 
