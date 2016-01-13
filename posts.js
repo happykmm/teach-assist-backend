@@ -1,79 +1,56 @@
-/**
- * Created by WC on 2015/12/21.
- */
-/**
- *  req.params.course_id
- */
+
 var router = require("express")();
 var ObjectId = require('mongodb').ObjectId;
+var moment = require('moment');
 
 router.get('/:course_id', function(req, res) {
-    var result = {
-        code: 0,
-        desc: "success!",
-        content: []
-    };
-    var cursor = req.db.collection("posts").find( { course_id:req.params.course_id} );
-    cursor.each(function(err, doc) {
-        if (err === null) {
-            if (doc !== null) {
-                result.content.push(doc);
-            } else {
-                res.json(result);
-            }
-        } else {
-            result.code = 1;
-            result.desc = err.toString();
-            res.json(result);
-            return false;
-        }
-    });
+    try {
+        var course_id = ObjectId(req.params.course_id);
+    } catch(err) {
+        res.json({code:1, desc:"Invalid course id!"});
+        return false;
+    }
+    req.db.collection("posts")
+        .find({course_id: course_id})
+        .toArray().then(function(findResult) {
+            res.json({code:0, posts:findResult});
+        }, function(err) {
+            res.json({code:1, desc: err.toString()});
+        });
 });
 
 
 router.post('/:course_id', function(req, res) {
-    var user_id = req.body.user_id;
-    var user_name = req.body.user_name;
-    var course_id = req.params.course_id;
+    try {
+        var course_id = ObjectId(req.params.course_id);
+    } catch(err) {
+        res.json({code:1, desc: "Invalid course id!"});
+    }
     var title = req.body.title;
     var content = req.body.content;
-    var timestamp = Date.now();
-    var parent = 0;
-    var count_read = 0;
-    var count_zan = 0;
-    var top = req.body.top;
-    var result = {
-        code: 0,
-        desc: "success!",
-        content:[]
+    if (!title || !content) {
+        res.json({code:2, desc:"Incomplete parameters"});
+        return false;
+    }
+    var newRecord = {
+        "user_id": req.users._id,
+        "user_name": req.users.realname,
+        "course_id": course_id,
+        "title": title,
+        "content": content,
+        "timestamp": moment().unix(),
+        "parent": 0,
+        "count_read": 0,
+        "count_zan": 0,
+        "top": 0
     };
-    if(title===null || content ===null)
-    {
-        result.code = 1;
-        result.desc = "There is no title or no content!";
-        res.json(result);
-    }
-    else{
-        req.db.collection("posts").insertOne( { "user_id":user_id,"user_name":user_name,
-            "course_id":course_id,"title":title,"content":content,"timestamp":timestamp,"parent":parent,
-            "count_read":count_read,"count_zan":count_zan,"top":top}).then(function(insertResult){
-            var newpost = insertResult.ops[0];
-            result.content.push({
-                _id: newpost._id,
-                user_id: newpost.user_id,
-                user_name: newpost.user_name,
-                course_id: newpost.course_id,
-                title: newpost.title,
-                content: newpost.content,
-                timestamp:newpost.timestamp,
-                parent:newpost.parent,
-                count_read:newpost.count_read,
-                count_zan:newpost.count_zan,
-                top:newpost.top
-            })
-        });
-        res.json(result);
-    }
+    req.db.collection("posts")
+        .insertOne( newRecord )
+        .then(function(insertResult){
+            var newPost = insertResult.ops;
+            console.log(newPost);
+            res.json({code:0, posts: newPost})
+    });
 });
 
 router.put('/:course_id', function(req, res) {
