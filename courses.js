@@ -325,4 +325,22 @@ router.get('/:_id/students', function(req, res) {
         });
 });
 
+
+router.get('/:_id/teacher', function(req,res) {
+    try {
+        var course_id = ObjectId(req.params._id);
+    } catch(err) {
+        console.error({code:1, desc:"Invalid course id!"});
+    }
+    req.db.collection("users")
+        .find(
+            {type:"teacher", courses:course_id}
+        ).toArray().then(function(findResult) {
+            var intro = findResult[0].intro;
+            res.json({code:0, intro:intro});
+        }, function(err) {
+            res.json({code:1, desc:err.toString()});
+        })
+});
+
 module.exports = router;
