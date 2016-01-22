@@ -1,4 +1,4 @@
-# mongo-express-demo
+# Teach-Assist-Backend
 RESTful API service for teaching assistant website.  
 Base on MongoDB & express.js  
 
