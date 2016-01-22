@@ -1,9 +1,11 @@
 # mongo-express-demo
-A RESTful application with mongodb and express.
+RESTful API service for teaching assistant website.  
+Base on MongoDB & express.js  
 
 
 ### How to build & run
 1. git clone
+2. ask for certificates
 2. npm install
 3. npm start
-4. access localhost:8080/courses
+4. access https://localhost:8080/
