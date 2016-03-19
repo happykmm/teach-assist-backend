@@ -19,7 +19,7 @@ var app        = express();
 
 app.set("jwtTokenSecret", "Happy-Christmas");
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 9999;
 https.createServer({
     key: fs.readFileSync('certificates/server.key'),
     cert: fs.readFileSync('certificates/server.crt')
