@@ -2,10 +2,59 @@ var router = require('express')();
 var jwt = require('jwt-simple');
 var moment = require('moment');
 var md5 = require('md5');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+var userSchema = new Schema({
+    type: {
+        type: String,
+        enum: ['teacher', 'student'],
+        required: true
+    },
+    number: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    realname: {
+        type: String,
+        required: true
+    },
+    courses: {
+        type: [Schema.Types.ObjectId]
+    },
+    intro: {
+        type: String
+    }
+});
+
+var userModel = mongoose.model('users', userSchema);
+
+//userModel.create({
+//    type: 'teacher',
+//    number: 20001,
+//    password: '123456',
+//    realname: null
+//}).exec(function() {
+//    console.log(arguments);
+//});
 
 router.post('/', function(req, res) {
     var password = md5(req.body.password);
     console.log("md5 passowrd: " + password);
+
+    userModel.find({
+        number: req.body.username,
+        password: md5(req.body.password)
+
+    }).exec(function () {
+        console.log(arguments);
+    });
+
+
     req.db.collection("users").find({
         number: req.body.username,
         password: md5(req.body.password)

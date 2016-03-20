@@ -1,5 +1,5 @@
 {
-  "name": "mongo-express-demo",
+  "name": "teach-assist-backend",
   "version": "1.0.0",
   "description": "A RESTful API server with mongodb && express.js",
   "main": "server.js",
@@ -12,10 +12,12 @@
     "body-parser": "^1.14.1",
     "es6-promise": "^3.0.2",
     "express": "^4.13.3",
+    "jssha": "^2.0.2",
     "jwt-simple": "^0.4.0",
     "md5": "^2.0.0",
     "moment": "^2.10.6",
     "mongodb": "^2.0.52",
+    "mongoose": "^4.4.8",
     "qiniu": "^6.1.9"
   }
 }

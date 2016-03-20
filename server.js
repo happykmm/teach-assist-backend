@@ -2,17 +2,17 @@ var fs         = require('fs');
 var https      = require('https');
 var express    = require('express');
 var bodyParser = require('body-parser');
-var CORS       = require('./cors');
+var CORS       = require('./router/cors');
 var dbInit     = require('./db-init');
-var loginCheck = require('./login-check');
-var login      = require('./login');
-var courses    = require('./courses');
-var posts      = require('./posts');
-var homework   = require("./homework");
-var ppt        = require("./ppt");
-var qiniu      = require("./qiniu");
-var replies    = require("./replies");
-var self       = require("./self");
+var loginCheck = require('./router/login-check');
+var login      = require('./router/login');
+var courses    = require('./router/courses');
+var posts      = require('./router/posts');
+var homework   = require("./router/homework");
+var ppt        = require("./router/ppt");
+var qiniu      = require("./router/qiniu");
+var replies    = require("./router/replies");
+var self       = require("./router/self");
 var app        = express();
 
 
