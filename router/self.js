@@ -1,4 +1,5 @@
 var router = require("express")();
+var userModel = require("../model/user");
 
 router.get('/', function(req, res) {
     res.json({code:0, intro: req.users.intro});
