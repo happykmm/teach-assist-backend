@@ -15,7 +15,7 @@ router.post('/', function(req, res, next) {
             number: username,
             password: password
         }).
-        select({_id:1, number:1, realname:1}).
+        select({_id:1, type:1, number:1, realname:1}).
         exec(function (err, user) {
             if (err)  return next(err);
             if (!user)  return res.json({
@@ -26,6 +26,7 @@ router.post('/', function(req, res, next) {
                 iss: user._id,
                 exp: moment().add(7, 'days').valueOf()
             }, req.app.get("jwtTokenSecret"));
+            console.log(user);
             res.json({
                 code: 0,
                 token: token,
