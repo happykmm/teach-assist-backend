@@ -13,31 +13,31 @@ router.all('*', function(req, res, next) {
     });
     try {
         var decoded = jwt.decode(token, req.app.get('jwtTokenSecret'));
+        if (decoded.exp <= Date.now()) return res.json({
+            code: 1,
+            desc: "身份过期，请重新登录！"
+        });
+        userModel.findOne({
+            _id: ObjectId(decoded.iss)
+        }).exec(function(err, user) {
+            if (err) return next(err);
+            if (!user) return res.json({
+                code: 1,
+                desc: "身份无效，请重新登录！"
+            });
+            req.users = {
+                _id: user._id,
+                type: user.type,
+                number: user.number,
+                realname: user.realname,
+                intro: user.intro,
+                courses: user.courses || []
+            };
+            next();
+        });
     } catch (err) {
         next(err);
     }
-    if (decoded.exp <= Date.now()) return res.json({
-        code: 1,
-        desc: "身份过期，请重新登录！"
-    });
-    userModel.findOne({
-        _id: ObjectId(decoded.iss)
-    }).exec(function(err, user) {
-        if (err) return next(err);
-        if (!user) return res.json({
-            code: 1,
-            desc: "身份无效，请重新登录！"
-        });
-        req.users = {
-            _id: user._id,
-            type: user.type,
-            number: user.number,
-            realname: user.realname,
-            intro: user.intro,
-            courses: user.courses || []
-        };
-        next();
-    });
 });
 
 module.exports = router;
