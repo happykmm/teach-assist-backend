@@ -1,6 +1,6 @@
 
 var router = require("express")();
-var ObjectId = require('mongodb').ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 var moment = require('moment');
 
 router.get('/:course_id', function(req, res) {

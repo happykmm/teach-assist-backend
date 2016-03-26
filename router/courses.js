@@ -1,5 +1,5 @@
 var router = require("express")();
-var ObjectId = require('mongodb').ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 var md5 = require('md5');
 
 //---------------------防止越权------------------------

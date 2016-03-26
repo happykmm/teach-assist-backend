@@ -1,6 +1,6 @@
 var router = require("express")();
 var qiniu = require('qiniu');
-var ObjectId = require('mongodb').ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 
 
 qiniu.conf.ACCESS_KEY = "9aJS9z4k3tz1-YWmcW2BnZr6imrVJeIo8gffioMY";

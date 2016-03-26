@@ -1,5 +1,5 @@
 var router = require('express')();
-var ObjectId = require('mongodb').ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 var moment = require('moment');
 
 router.post('/up', function(req, res) {

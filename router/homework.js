@@ -1,5 +1,5 @@
 var router = require("express")();
-var ObjectId = require('mongodb').ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 
 //----------------------新增作业------------------------
 router.post('/:course_id', function(req, res) {

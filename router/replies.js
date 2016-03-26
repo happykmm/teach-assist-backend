@@ -2,7 +2,7 @@
  * Created by wc on 2015/12/24.
  */
 var router = require("express")();
-var ObejectId = require("mongodb").ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 
 
 //-----------------------获取某课程某帖子的所有回复------------------------------
