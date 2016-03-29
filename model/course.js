@@ -16,7 +16,19 @@ var courseSchema = new Schema({
         type: [Schema.Types.ObjectId]
     },
     ppt: {
-        type: [Schema.Types.ObjectId]
+        filename: {
+            type: String,
+            required: true
+        },
+        storename: {
+            type: String,
+            required: true
+        },
+        timestamp: {
+            type: Number,
+            required: true,
+            default: Date.now
+        }
     },
     teacher: {
         type: String,

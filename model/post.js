@@ -27,8 +27,8 @@ var postSchema = new Schema({
         default: Date.now
     },
     parent: {
-        required: true,
-        default: 0
+        type: Schema.Types.ObjectId,
+        default: null
     },
     count_read: {
         type: Number,

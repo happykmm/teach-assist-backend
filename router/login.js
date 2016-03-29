@@ -9,7 +9,6 @@ router.post('/', function(req, res, next) {
     var username = req.body.username;
     var password = req.body.password;
     password = encrypt(username, password);
-    console.log("encrypt password: " + password);
     userModel.
         findOne({
             number: username,
@@ -26,7 +25,6 @@ router.post('/', function(req, res, next) {
                 iss: user._id,
                 exp: moment().add(7, 'days').valueOf()
             }, req.app.get("jwtTokenSecret"));
-            console.log(user);
             res.json({
                 code: 0,
                 token: token,
