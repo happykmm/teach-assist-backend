@@ -16,11 +16,13 @@ var postSchema = new Schema({
     },
     title: {
         type: String,
-        required: true
+        required: true,
+        default: ""
     },
     content: {
         type: String,
-        required: true
+        required: true,
+        default: ""
     },
     parent: {
         type: Schema.Types.ObjectId,
@@ -32,6 +34,11 @@ var postSchema = new Schema({
         default: 0
     },
     count_zan: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    count_reply: {
         type: Number,
         required: true,
         default: 0

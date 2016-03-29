@@ -40,28 +40,12 @@ router.all('/:course_id', function(req, res, next) {
 //---------------------获取帖子列表--------------------
 // {
 //     "code": 0,
-//     "posts": [
-//     {
-//         "_id": "56fa6aaf3d72f19c21058da2",
-//         "updatedAt": "2016-03-29T11:44:47.846Z",
-//         "createdAt": "2016-03-29T11:44:47.846Z",
-//         "user_id": "56957522f7b3032a3c630da9",
-//         "user_name": "张泉方",
-//         "course_id": "5682725d60ff7eac1d73edeb",
-//         "title": "lalala",
-//         "content": "lololo",
-//         "__v": 0,
-//         "del": 0,
-//         "top": 0,
-//         "count_zan": 0,
-//         "count_read": 0,
-//         "parent": null
-//     }
-// ]
+//     "posts": [ {},{},{}... ]
 // }
 router.get('/:course_id', function(req, res, next) {
     postModel.find({
         course_id: req.params.course_id,
+        parent: null,
         del: 0
     }).exec(function(err, posts) {
         if (err) return next(err);
@@ -105,45 +89,95 @@ router.post('/:course_id', function(req, res, next) {
     });      
 });
 
-/*router.put('/:course_id', function(req, res) {
-    var course_id = req.body.course_id;
-    var newtitle = req.body.title;
-    var newcontent = req.body.content;
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    if(newtitle===null || newcontent ===null)
-    {
-        result.code = 1;
-        result.desc = "There is no update title or no update content!";
-        res.json(result);
-    }
-    else{
-        var promise = req.db.collection("posts").updateOne
-        (
-            { "_id":ObjectId(course_id)},
-            { $set:{ "title":newtitle,"content":newcontent} }
-        );
-    }
-    res.json(result);
-});*/
 
-router.delete('/:course_id/:post_id', function(req, res) {
-    var id=req.query.post_id;
-    var result = {
-        code: 0,
-        desc: "success!"
-    };
-    
+//---------------------查看回复------------------------
+router.get('/:course_id/:post_id', function(req, res, next) {
     postModel.update({
-        
-    })
-    req.db.collection("posts").deleteOne( { "_id":ObjectId(req.query.post_id) }).
-        then(function(err)
-            {res.json({code:1, desc:err.toString()})}
-    );
-    res.json(result);
+        _id: req.params.post_id
+    },{
+        $inc: {count_read: 1}
+    }, function(err, result) {
+        if (err) next(err);
+        console.log(result);
+    });
+    postModel.find({
+        course_id: req.params.course_id,
+        parent: req.params.post_id,
+        del: 0
+    }).exec(function(err, posts) {
+        if (err) return next(err);
+        res.json({code: 0, posts: posts});
+    });
 });
+
+
+//---------------------新增回复------------------------
+router.post('/:course_id/:post_id', function(req, res, next) {
+    if (!req.body.title) return next("帖子标题不能为空！");
+    if (!req.body.content)  return next("帖子内容不能为空！");
+    postModel.create({
+        user_id: req.users._id,
+        user_name: req.users.realname,
+        course_id: req.params.course_id,
+        title: req.body.title,
+        content: req.body.content,
+        parent: req.params.post_id
+    }, function(err, post) {
+        if (err) return next(err);
+        res.json({code:0, post:post});
+        updateCountReply(post.parent, 1);
+    });
+});
+
+
+//---------------------编辑帖子------------------------
+//只能修改自己发的主题帖，不能修改回复贴,不能修改已经被删除的帖子
+router.put('/:course_id/:post_id', function(req, res, next) {
+    if (!req.body.title) return next("帖子标题不能为空！");
+    if (!req.body.content) return next("帖子内容不能为空！");
+    postModel.findOne({
+        _id: req.params.post_id
+    }, function(err, doc) {
+        if (err) return next(err);
+        if (!doc) return next("该帖子不存在！");
+        if (doc.del) return next("该帖子已经被删除！");
+        if (!doc.user_id.equals(req.users._id)) return next("您无权编辑该帖子！");
+        if (doc.parent) return next("回复内容不能编辑！");
+        doc.title = req.body.title;
+        doc.content = req.body.content;
+        doc.save();
+        res.json({code: 0});
+    })
+});
+
+
+//---------------------删除帖子------------------------
+//只能删除自己发的帖子
+router.delete('/:course_id/:post_id', function(req, res, next) {
+    postModel.findOne({
+        _id: req.params.post_id,
+        user_id: req.users._id
+    }, function(err, doc) {
+        if (err) return next(err);
+        if (!doc) return next("您无权删除该帖子!");
+        if (doc.del) return next("该帖子已经被删除！");
+        doc.del++;
+        doc.save();
+        res.json({code: 0});
+        if (doc.parent) updateCountReply(doc.parent, -1);
+    });
+});
+
+
+function updateCountReply(_id, delta) {
+    postModel.findOne({
+        _id: _id
+    }, function(err, parentDoc) {
+        if (err) return console.log(err.stack);
+        if (!parentDoc) return console.log("更新回复数量失败，id="+_id);
+        parentDoc.count_reply += delta;
+        parentDoc.save();
+    });
+}
 
 module.exports = router;
