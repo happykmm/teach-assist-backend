@@ -19,12 +19,8 @@ var postSchema = new Schema({
         required: true
     },
     content: {
-        type: String
-    },
-    timestamp: {
-        type: Number,
-        required: true,
-        default: Date.now
+        type: String,
+        required: true
     },
     parent: {
         type: Schema.Types.ObjectId,
@@ -44,7 +40,15 @@ var postSchema = new Schema({
         type: Number,
         required: true,
         default: 0
+    },
+    del: {
+        type: Number,
+        required: true,
+        default: 0
     }
+},
+{
+    timestamps: true
 });
 
 var postModel = mongoose.model('posts', postSchema);

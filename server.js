@@ -13,6 +13,7 @@ var ppt        = require("./router/ppt");
 var qiniu      = require("./router/qiniu");
 var replies    = require("./router/replies");
 var self       = require("./router/self");
+var errorHandler = require("./helper/error-handler");
 var app        = express();
 
 
@@ -40,5 +41,6 @@ app.use('/posts', posts);
 app.use('/homework', homework);
 app.use('/ppt', ppt);
 app.use('/self', self);
+app.use(errorHandler);
 
 console.log('Magic happens on port '+port);

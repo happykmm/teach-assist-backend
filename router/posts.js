@@ -3,74 +3,106 @@ var ObjectId = require('mongoose').Types.ObjectId;
 var moment = require('moment');
 var postModel = require('../model/post');
 
-//---------------------防止越权------------------------
-router.all('/:course_id/*', function(req, res, next) {
 
-
-
-
-    var isMatch = false;
-    req.users.courses.forEach(function(course_id) {
-        if (course_id.equals(req.params._id)) {
-            isMatch = true;
-            return false;
-        }
-    });
-    if (!isMatch) {
-        res.json({code:1, desc:"Invalid course id!"});
-        return false;
+//-------------------转义课程号------------------------
+router.all('/:course_id', function(req, res, next) {
+    try {
+        req.params.course_id = ObjectId(req.params.course_id)
+    } catch(err) {
+        return next("课程号不存在！");
     }
     next();
 });
 
-
-router.get('/:course_id', function(req, res, next) {
+//-------------------转义帖子号------------------------
+router.all('/:course_id/:post_id', function(req, res, next) {
     try {
-        postModel.find({
-            course_id: ObjectId(req.params.course_id)
-        }).exec(function(err, posts) {
-            if (err) return next(err);
-            res.json({code: 0, posts: posts});
-        });
+        req.params.post_id = ObjectId(req.params.post_id)
     } catch(err) {
-        res.json({code:1, desc:"课程号错误，请重试!"});
-        return false;
+        return next("帖子号不存在！");
     }
+    next();
+});
+
+//---------------------防止越权------------------------
+router.all('/:course_id', function(req, res, next) {
+    var isMatch = false;
+    req.users.courses.forEach(function(course_id) {
+        if (course_id.equals(req.params.course_id)) {
+            isMatch = true;
+            return false;
+        }
+    });
+    isMatch ? next() : next("您没有访问该课程的权限!");
 });
 
 
-router.post('/:course_id', function(req, res, next) {
-    try {
-        var course_id = ObjectId(req.params.course_id);
-    } catch(err) {
-        res.json({code:1, desc: "课程号错误，请重试！"});
-    }
-    var title = req.body.title;
-    var content = req.body.content;
-    if (!title || !content) return res.json({
-        code:2, desc: "帖子内容不能为空！"
+//---------------------获取帖子列表--------------------
+// {
+//     "code": 0,
+//     "posts": [
+//     {
+//         "_id": "56fa6aaf3d72f19c21058da2",
+//         "updatedAt": "2016-03-29T11:44:47.846Z",
+//         "createdAt": "2016-03-29T11:44:47.846Z",
+//         "user_id": "56957522f7b3032a3c630da9",
+//         "user_name": "张泉方",
+//         "course_id": "5682725d60ff7eac1d73edeb",
+//         "title": "lalala",
+//         "content": "lololo",
+//         "__v": 0,
+//         "del": 0,
+//         "top": 0,
+//         "count_zan": 0,
+//         "count_read": 0,
+//         "parent": null
+//     }
+// ]
+// }
+router.get('/:course_id', function(req, res, next) {
+    postModel.find({
+        course_id: req.params.course_id,
+        del: 0
+    }).exec(function(err, posts) {
+        if (err) return next(err);
+        res.json({code: 0, posts: posts});
     });
+});
 
+
+//---------------------新增主题帖------------------------
+// {
+//     "code": 0,
+//     "post": {
+//     "__v": 0,
+//         "updatedAt": "2016-03-29T11:45:00.912Z",
+//         "createdAt": "2016-03-29T11:45:00.912Z",
+//         "user_id": "56957522f7b3032a3c630da9",
+//         "user_name": "张泉方",
+//         "course_id": "5682725d60ff7eac1d73edeb",
+//         "title": "lalala",
+//         "content": "lololo",
+//         "_id": "56fa6abc3d72f19c21058da3",
+//         "del": 0,
+//         "top": 0,
+//         "count_zan": 0,
+//         "count_read": 0,
+//         "parent": null
+// }
+// }
+router.post('/:course_id', function(req, res, next) {
+    if (!req.body.title) return next("帖子标题不能为空！");
+    if (!req.body.content)  return next("帖子内容不能为空！");
     postModel.create({
         user_id: req.users._id,
         user_name: req.users.realname,
-        course_id: course_id,
-        title: title,
-        content: content
+        course_id: req.params.course_id,
+        title: req.body.title,
+        content: req.body.content
     }, function(err, post) {
         if (err) return next(err);
-        console.log(post);
-
-    })
-
-
-    req.db.collection("posts")
-        .insertOne( newRecord )
-        .then(function(insertResult){
-            var newPost = insertResult.ops;
-            console.log(newPost);
-            res.json({code:0, posts: newPost})
-    });
+        res.json({code:0, post:post});
+    });      
 });
 
 /*router.put('/:course_id', function(req, res) {
@@ -97,12 +129,16 @@ router.post('/:course_id', function(req, res, next) {
     res.json(result);
 });*/
 
-router.delete('/:course_id', function(req, res) {
+router.delete('/:course_id/:post_id', function(req, res) {
     var id=req.query.post_id;
     var result = {
         code: 0,
         desc: "success!"
     };
+    
+    postModel.update({
+        
+    })
     req.db.collection("posts").deleteOne( { "_id":ObjectId(req.query.post_id) }).
         then(function(err)
             {res.json({code:1, desc:err.toString()})}

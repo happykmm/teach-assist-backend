@@ -20,10 +20,14 @@ var userSchema = new Schema({
         required: true
     },
     courses: {
-        type: [Schema.Types.ObjectId]
+        type: [Schema.Types.ObjectId],
+        required: true,
+        default: []
     },
     intro: {
-        type: String
+        type: String,
+        required: true,
+        default: ""
     }
 });
 
