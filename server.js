@@ -11,7 +11,6 @@ var posts      = require('./router/posts');
 var homework   = require("./router/homework");
 var ppt        = require("./router/ppt");
 var qiniu      = require("./router/qiniu");
-var replies    = require("./router/replies");
 var self       = require("./router/self");
 var errorHandler = require("./helper/error-handler");
 var app        = express();
