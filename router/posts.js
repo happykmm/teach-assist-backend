@@ -92,14 +92,6 @@ router.post('/:course_id', function(req, res, next) {
 
 //---------------------查看回复------------------------
 router.get('/:course_id/:post_id', function(req, res, next) {
-    postModel.update({
-        _id: req.params.post_id
-    },{
-        $inc: {count_read: 1}
-    }, function(err, result) {
-        if (err) next(err);
-        console.log(result);
-    });
     postModel.find({
         course_id: req.params.course_id,
         parent: req.params.post_id,
@@ -107,19 +99,28 @@ router.get('/:course_id/:post_id', function(req, res, next) {
     }).exec(function(err, posts) {
         if (err) return next(err);
         res.json({code: 0, posts: posts});
+        //增加阅读量，刷新回复量
+        postModel.findOne({
+            _id: req.params.post_id
+        }, function(err, doc) {
+            if (err) return next(err);
+            if (!doc) return next("增加阅读量失败，id="+req.params.post_id);
+            doc.count_read++;
+            doc.count_reply = posts.length;
+            doc.save();
+        });
     });
 });
 
 
 //---------------------新增回复------------------------
 router.post('/:course_id/:post_id', function(req, res, next) {
-    if (!req.body.title) return next("帖子标题不能为空！");
     if (!req.body.content)  return next("帖子内容不能为空！");
     postModel.create({
         user_id: req.users._id,
         user_name: req.users.realname,
         course_id: req.params.course_id,
-        title: req.body.title,
+        title: "",
         content: req.body.content,
         parent: req.params.post_id
     }, function(err, post) {
