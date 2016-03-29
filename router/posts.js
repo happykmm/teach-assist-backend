@@ -3,6 +3,27 @@ var ObjectId = require('mongoose').Types.ObjectId;
 var moment = require('moment');
 var postModel = require('../model/post');
 
+//---------------------防止越权------------------------
+router.all('/:course_id/*', function(req, res, next) {
+
+
+
+
+    var isMatch = false;
+    req.users.courses.forEach(function(course_id) {
+        if (course_id.equals(req.params._id)) {
+            isMatch = true;
+            return false;
+        }
+    });
+    if (!isMatch) {
+        res.json({code:1, desc:"Invalid course id!"});
+        return false;
+    }
+    next();
+});
+
+
 router.get('/:course_id', function(req, res, next) {
     try {
         postModel.find({
