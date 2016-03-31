@@ -4,28 +4,8 @@ var moment = require('moment');
 var postModel = require('../model/post');
 
 
-//-------------------转义课程号------------------------
-router.all('/:course_id', function(req, res, next) {
-    try {
-        req.params.course_id = ObjectId(req.params.course_id)
-    } catch(err) {
-        return next("课程号不存在！");
-    }
-    next();
-});
-
-//-------------------转义帖子号------------------------
-router.all('/:course_id/:post_id', function(req, res, next) {
-    try {
-        req.params.post_id = ObjectId(req.params.post_id)
-    } catch(err) {
-        return next("帖子号不存在！");
-    }
-    next();
-});
-
 //---------------------防止越权------------------------
-router.all('/:course_id', function(req, res, next) {
+router.all('/:course_id*', function(req, res, next) {
     var isMatch = false;
     req.users.courses.forEach(function(course_id) {
         if (course_id.equals(req.params.course_id)) {
@@ -35,6 +15,28 @@ router.all('/:course_id', function(req, res, next) {
     });
     isMatch ? next() : next("您没有访问该课程的权限!");
 });
+
+
+//-------------------转义课程号------------------------
+router.all('/:course_id*', function(req, res, next) {
+    try {
+        req.params.course_id = ObjectId(req.params.course_id)
+    } catch(err) {
+        return next("课程号不存在！");
+    }
+    next();
+});
+
+//-------------------转义帖子号------------------------
+router.all('/:course_id/:post_id*', function(req, res, next) {
+    try {
+        req.params.post_id = ObjectId(req.params.post_id)
+    } catch(err) {
+        return next("帖子号不存在！");
+    }
+    next();
+});
+
 
 
 //---------------------获取帖子列表--------------------
@@ -141,8 +143,9 @@ router.put('/:course_id/:post_id', function(req, res, next) {
     }, function(err, doc) {
         if (err) return next(err);
         if (!doc) return next("该帖子不存在！");
-        if (doc.del) return next("该帖子已经被删除！");
+        if (!doc.course_id.equals(req.params.course_id)) return next("该帖子不属于本课程！");
         if (!doc.user_id.equals(req.users._id)) return next("您无权编辑该帖子！");
+        if (doc.del) return next("该帖子已经被删除！");
         if (doc.parent) return next("回复内容不能编辑！");
         doc.title = req.body.title;
         doc.content = req.body.content;
@@ -156,11 +159,12 @@ router.put('/:course_id/:post_id', function(req, res, next) {
 //只能删除自己发的帖子
 router.delete('/:course_id/:post_id', function(req, res, next) {
     postModel.findOne({
-        _id: req.params.post_id,
-        user_id: req.users._id
+        _id: req.params.post_id
     }, function(err, doc) {
         if (err) return next(err);
-        if (!doc) return next("您无权删除该帖子!");
+        if (!doc) return next("该帖子不存在！");
+        if (!doc.course_id.equals(req.params.course_id)) return next("该帖子不属于本课程！");
+        if (!doc.user_id.equals(req.users._id)) return next("您无权删除该帖子!");
         if (doc.del) return next("该帖子已经被删除！");
         doc.del++;
         doc.save();
@@ -181,4 +185,29 @@ function updateCountReply(_id, delta) {
     });
 }
 
+
+//-----------------置顶或取消置顶----------------------
+//只能置顶主题帖，只有老师可以操作
+router.put('/:course_id/:post_id/top', function(req, res, next) {
+    if (req.users.type !== "teacher") return next("您没有权限置顶！");
+    postModel.findOne({
+        _id: req.params.post_id
+    }, function(err, doc) {
+        if (err) return next(err);
+        if (!doc) return next("该帖子不存在！");
+        if (!doc.course_id.equals(req.params.course_id)) return next("该帖子不属于本课程！");
+        // if (!doc.user_id.equals(req.users._id)) return next("您无权置顶该帖子!");
+        if (doc.del) return next("该帖子已经被删除！");
+        if (doc.parent) return next("回复内容不能置顶！");
+        doc.top = 1 - doc.top;
+        doc.save();
+        res.json({code: 0, top: doc.top});
+    })
+});
+
+
+
 module.exports = router;
+
+
+
