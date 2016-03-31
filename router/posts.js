@@ -42,15 +42,40 @@ router.all('/:course_id/:post_id*', function(req, res, next) {
 //---------------------获取帖子列表--------------------
 // {
 //     "code": 0,
-//     "posts": [ {},{},{}... ]
+//     "posts": [
+//     {
+//         "_id": "56fd165f86ea29181b35dc0e",
+//         "updatedAt": "2016-03-31T12:21:51.419Z",
+//         "createdAt": "2016-03-31T12:21:51.419Z",
+//         "user_id": "56957522f7b3032a3c630da9",
+//         "user_name": "张泉方",
+//         "top": 0,
+//         "count_reply": 0,
+//         "count_read": 0,
+//         "content": "你用彩虹的浪漫，温柔包装",
+//         "title": "彩虹",
+//         "count_like": 0
+//     }
+// ]
 // }
 router.get('/:course_id', function(req, res, next) {
     postModel.find({
         course_id: req.params.course_id,
         parent: null,
         del: 0
-    }).exec(function(err, posts) {
+    }, {
+        __v: 0,
+        course_id: 0,
+        del: 0,
+        parent: 0
+    }).
+    lean().
+    exec(function(err, posts) {
         if (err) return next(err);
+        posts.forEach(function(post, index) {
+            post.count_like = post.like_by.length;
+            delete post.like_by;
+        });
         res.json({code: 0, posts: posts});
     });
 });
@@ -60,20 +85,17 @@ router.get('/:course_id', function(req, res, next) {
 // {
 //     "code": 0,
 //     "post": {
-//     "__v": 0,
-//         "updatedAt": "2016-03-29T11:45:00.912Z",
-//         "createdAt": "2016-03-29T11:45:00.912Z",
+//     "updatedAt": "2016-03-31T12:36:05.287Z",
+//         "createdAt": "2016-03-31T12:36:05.287Z",
 //         "user_id": "56957522f7b3032a3c630da9",
 //         "user_name": "张泉方",
-//         "course_id": "5682725d60ff7eac1d73edeb",
-//         "title": "lalala",
-//         "content": "lololo",
-//         "_id": "56fa6abc3d72f19c21058da3",
-//         "del": 0,
+//         "_id": "56fd19b5cd4f59341935ec3c",
 //         "top": 0,
-//         "count_zan": 0,
+//         "count_reply": 0,
 //         "count_read": 0,
-//         "parent": null
+//         "content": "当天空昏暗，当气温失常",
+//         "title": "彩虹",
+//         "count_like": 0
 // }
 // }
 router.post('/:course_id', function(req, res, next) {
@@ -87,6 +109,13 @@ router.post('/:course_id', function(req, res, next) {
         content: req.body.content
     }, function(err, post) {
         if (err) return next(err);
+        post = post.toObject();
+        delete post.__v;
+        delete post.course_id;
+        delete post.del;
+        delete post.parent;
+        delete post.like_by;
+        post.count_like = 0;
         res.json({code:0, post:post});
     });      
 });
@@ -98,9 +127,20 @@ router.get('/:course_id/:post_id', function(req, res, next) {
         course_id: req.params.course_id,
         parent: req.params.post_id,
         del: 0
-    }).exec(function(err, posts) {
+    }, {
+        __v: 0,
+        course_id: 0,
+        del: 0,
+        parent: 0,
+        count_read: 0,
+        count_reply: 0,
+        like_by: 0,
+        updatedAt: 0,
+        top: 0,
+        title: 0
+    }).exec(function(err, replies) {
         if (err) return next(err);
-        res.json({code: 0, posts: posts});
+        res.json({code: 0, posts: replies});
         //增加阅读量，刷新回复量
         postModel.findOne({
             _id: req.params.post_id
@@ -108,7 +148,7 @@ router.get('/:course_id/:post_id', function(req, res, next) {
             if (err) return next(err);
             if (!doc) return next("增加阅读量失败，id="+req.params.post_id);
             doc.count_read++;
-            doc.count_reply = posts.length;
+            doc.count_reply = replies.length;
             doc.save();
         });
     });
@@ -122,11 +162,13 @@ router.post('/:course_id/:post_id', function(req, res, next) {
         user_id: req.users._id,
         user_name: req.users.realname,
         course_id: req.params.course_id,
-        title: "",
+        title: " ",
         content: req.body.content,
         parent: req.params.post_id
     }, function(err, post) {
         if (err) return next(err);
+        post = post.toObject();
+
         res.json({code:0, post:post});
         updateCountReply(post.parent, 1);
     });
@@ -196,7 +238,6 @@ router.put('/:course_id/:post_id/top', function(req, res, next) {
         if (err) return next(err);
         if (!doc) return next("该帖子不存在！");
         if (!doc.course_id.equals(req.params.course_id)) return next("该帖子不属于本课程！");
-        // if (!doc.user_id.equals(req.users._id)) return next("您无权置顶该帖子!");
         if (doc.del) return next("该帖子已经被删除！");
         if (doc.parent) return next("回复内容不能置顶！");
         doc.top = 1 - doc.top;
@@ -209,9 +250,24 @@ router.put('/:course_id/:post_id/top', function(req, res, next) {
 //-----------------点赞或取消点赞----------------------
 router.put('/:course_id/:post_id/like', function (req, res, next) {
     postModel.findOne({
-        _id: req.params.post_id
+        _id: req.params.post_id,
+        course_id: req.params.course_id,  //帖子属于本课程
+        del: 0,                           //帖子没有被删除
+        parent: null                      //帖子是主题帖
     }, function(err, doc) {
-        
+        if (err) return next(err);
+        if (!doc) return next("该帖子不存在！");
+        if (doc.like_by.id(req.users._id)) {
+            doc.like_by.id(req.users._id).remove();
+            res.json({code: 0, like: 0});
+        } else {
+            doc.like_by.push({
+                _id: req.users._id,
+                user_name: req.users.realname
+            });
+            res.json({code: 0, like: 1});
+        }
+        doc.save();
     });
     
 });

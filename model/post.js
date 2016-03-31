@@ -1,17 +1,20 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = Schema.Types.ObjectId;
 
 var postSchema = new Schema({
-    user_id: {
-        type: Schema.Types.ObjectId,
+    userId: {
+        type: ObjectId,
+        ref: 'users',
         required: true
     },
-    user_name: {
+    userName: {
         type: String,
         required: true
     },
-    course_id: {
-        type: Schema.Types.ObjectId,
+    courseId: {
+        type: ObjectId,
+        ref: 'courses',
         required: true
     },
     title: {
@@ -24,51 +27,72 @@ var postSchema = new Schema({
         required: true,
         default: ""
     },
-    parent: {
-        type: Schema.Types.ObjectId,
-        default: null
-    },
-    count_read: {
+    countRead: {
         type: Number,
         required: true,
         default: 0
     },
-    count_like: {
+    isTop: {
         type: Number,
         required: true,
         default: 0
     },
-    count_reply: {
+    isDel: {
         type: Number,
         required: true,
         default: 0
     },
-    top: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    del: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    like: {
-        type: [{
-            user_id: {
-                type: Schema.Types.ObjectId,
-                required: true
-            },
-            user_name: {
-                type: String,
-                required: true
-            }
-        }]
-    }
+    likeBy: [{
+        _id: {
+            type: ObjectId,
+            ref: 'users',
+            required: true
+        },
+        user_name: {
+            type: String,
+            required: true
+        }
+    }],
+    reply: [{
+        userId: {
+            type: ObjectId,
+            ref: 'users',
+            required: true
+        },
+        userName: {
+            type: String,
+            required: true
+        },
+        content: {
+            type: String,
+            required: true
+        },
+        timestamp: {
+            type: Date,
+            required: true,
+            default: Date.now
+        }
+    }]
 },
 {
-    timestamps: true
+    timestamps: true,
+    toObject: {
+        virtuals: true
+    },
+    toJSON: {
+        virtuals: true
+    }
 });
+
+
+postSchema.virtual('countLike').get(function() {
+    return this.likeBy.length;
+});
+
+postSchema.virtual('countReply').get(function() {
+    return this.reply.length;
+});
+
 
 var postModel = mongoose.model('posts', postSchema);
 
