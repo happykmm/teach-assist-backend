@@ -33,7 +33,7 @@ var postSchema = new Schema({
         required: true,
         default: 0
     },
-    count_zan: {
+    count_like: {
         type: Number,
         required: true,
         default: 0
@@ -52,6 +52,18 @@ var postSchema = new Schema({
         type: Number,
         required: true,
         default: 0
+    },
+    like: {
+        type: [{
+            user_id: {
+                type: Schema.Types.ObjectId,
+                required: true
+            },
+            user_name: {
+                type: String,
+                required: true
+            }
+        }]
     }
 },
 {

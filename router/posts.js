@@ -206,6 +206,16 @@ router.put('/:course_id/:post_id/top', function(req, res, next) {
 });
 
 
+//-----------------点赞或取消点赞----------------------
+router.put('/:course_id/:post_id/like', function (req, res, next) {
+    postModel.findOne({
+        _id: req.params.post_id
+    }, function(err, doc) {
+        
+    });
+    
+});
+
 
 module.exports = router;
 
