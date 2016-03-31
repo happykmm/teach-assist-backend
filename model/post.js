@@ -2,6 +2,29 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
+
+var replySchema = new Schema({
+    userId: {
+        type: ObjectId,
+        ref: 'users',
+        required: true
+    },
+    userName: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    timestamp: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+
+
 var postSchema = new Schema({
     userId: {
         type: ObjectId,
@@ -32,6 +55,16 @@ var postSchema = new Schema({
         required: true,
         default: 0
     },
+    countLike: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    countReply: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     isTop: {
         type: Number,
         required: true,
@@ -53,45 +86,20 @@ var postSchema = new Schema({
             required: true
         }
     }],
-    reply: [{
-        userId: {
-            type: ObjectId,
-            ref: 'users',
-            required: true
-        },
-        userName: {
-            type: String,
-            required: true
-        },
-        content: {
-            type: String,
-            required: true
-        },
-        timestamp: {
-            type: Date,
-            required: true,
-            default: Date.now
-        }
-    }]
+    reply: [replySchema]
 },
 {
-    timestamps: true,
-    toObject: {
-        virtuals: true
-    },
-    toJSON: {
-        virtuals: true
-    }
+    timestamps: true
 });
 
 
-postSchema.virtual('countLike').get(function() {
-    return this.likeBy.length;
-});
-
-postSchema.virtual('countReply').get(function() {
-    return this.reply.length;
-});
+// postSchema.virtual('countLike').get(function() {
+//     return this.likeBy.length;
+// });
+//
+// postSchema.virtual('countReply').get(function() {
+//     return this.reply.length;
+// });
 
 
 var postModel = mongoose.model('posts', postSchema);
