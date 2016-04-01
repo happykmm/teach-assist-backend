@@ -132,6 +132,9 @@ router.get('/:courseId/:postId', function(req, res, next) {
         post.countLike = post.likeBy.length;
         post.countReply = post.reply.length;
         post.save();
+        var isLike = post.likeBy.id(req.users._id) ? 1 : 0;
+        post = post.toObject();
+        post.isLike = isLike;
         res.json({code: 0, post: post});
     });
 });
@@ -238,7 +241,6 @@ router.put('/:courseId/:postId/like', function (req, res, next) {
         post.countLike = post.likeBy.length;
         post.save();
     });
-    
 });
 
 
