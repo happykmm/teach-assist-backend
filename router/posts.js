@@ -135,6 +135,11 @@ router.get('/:courseId/:postId', function(req, res, next) {
         var isLike = post.likeBy.id(req.users._id) ? 1 : 0;
         post = post.toObject();
         post.isLike = isLike;
+        post.reply = post.reply.filter(function(reply) {
+            var isShow = !reply.isDel;
+            delete reply.isDel;
+            return isShow;
+        });
         res.json({code: 0, post: post});
     });
 });
@@ -195,6 +200,29 @@ router.delete('/:courseId/:postId', function(req, res, next) {
         if (err) return next(err);
         if (!post) return next("该帖子不存在！");
         post.isDel++;
+        post.save();
+        res.json({code: 0});
+    });
+});
+
+
+//---------------------删除回复帖------------------------
+//只能删除自己发的帖子
+router.delete('/:courseId/:postId/:replyId', function(req, res, next) {
+    postModel.findOne({
+        _id: req.params.postId,
+        courseId: req.params.courseId,
+        isDel: 0
+    }, function(err, post) {
+        if (err) return next(err);
+        if (!post) return next("该帖子不存在！");
+        var reply = post.reply.id(req.params.replyId);
+        if (reply._id.equals(req.params.replyId) &&
+            reply.userId.equals(req.users._id) &&
+            reply.isDel === 0) {
+            reply.isDel++;
+        } else
+            return next("该回复不存在！");
         post.save();
         res.json({code: 0});
     });

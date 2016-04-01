@@ -17,6 +17,11 @@ var replySchema = new Schema({
         type: String,
         required: true
     },
+    isDel: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     timestamp: {
         type: Date,
         required: true,
