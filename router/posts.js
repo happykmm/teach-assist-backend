@@ -80,17 +80,17 @@ router.get('/:courseId', function(req, res, next) {
 // {
 //     "code": 0,
 //     "post": {
-//     "updatedAt": "2016-03-31T13:32:56.622Z",
-//         "createdAt": "2016-03-31T13:32:56.622Z",
+//         "updatedAt": "2016-04-01T02:45:29.044Z",
+//         "createdAt": "2016-04-01T02:45:29.044Z",
 //         "userId": "56957522f7b3032a3c630da9",
 //         "userName": "张泉方",
-//         "_id": "56fd270825a1f4841c685265",
+//         "_id": "56fde0c959a6aa5824b895ef",
 //         "isTop": 0,
 //         "countReply": 0,
 //         "countLike": 0,
 //         "countRead": 0,
-//         "content": "好听好听！！！",
-//         "title": "彩虹"
+//         "content": "菊花残，满地伤，你的笑容已泛黄",
+//         "title": "菊花残"
 // }
 // }
 router.post('/:courseId', function(req, res, next) {
@@ -130,17 +130,17 @@ router.get('/:courseId/:postId', function(req, res, next) {
         if (!post) return next("帖子不存在");
         post.countRead++;
         post.countLike = post.likeBy.length;
-        post.countReply = post.reply.length;
-        post.save();
-        var isLike = post.likeBy.id(req.users._id) ? 1 : 0;
-        post = post.toObject();
-        post.isLike = isLike;
-        post.reply = post.reply.filter(function(reply) {
+        var postObj = post.toObject();
+        postObj.isLike = post.likeBy.id(req.users._id) ? 1 : 0;
+        postObj.reply = postObj.reply.filter(function(reply) {
             var isShow = !reply.isDel;
             delete reply.isDel;
             return isShow;
         });
-        res.json({code: 0, post: post});
+        console.log(postObj);
+        post.countReply = postObj.countReply = postObj.reply.length;
+        post.save();
+        res.json({code: 0, post: postObj});
     });
 });
 
@@ -160,9 +160,11 @@ router.post('/:courseId/:postId', function(req, res, next) {
             userName: req.users.realname,
             content: req.body.content
         });
-        post.countReply = post.reply.length;
+        post.countReply++;
         post.save();
-        res.json({code: 0, reply: post.reply[post.countReply-1]});
+        var reply = post.reply[post.reply.length-1].toObject();
+        delete reply.isDel;
+        res.json({code: 0, reply: reply});
     });
 });
 
@@ -217,10 +219,12 @@ router.delete('/:courseId/:postId/:replyId', function(req, res, next) {
         if (err) return next(err);
         if (!post) return next("该帖子不存在！");
         var reply = post.reply.id(req.params.replyId);
-        if (reply._id.equals(req.params.replyId) &&
+        if (reply &&
+            reply._id.equals(req.params.replyId) &&
             reply.userId.equals(req.users._id) &&
             reply.isDel === 0) {
             reply.isDel++;
+            post.countReply--;
         } else
             return next("该回复不存在！");
         post.save();
