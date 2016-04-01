@@ -81,7 +81,7 @@ var postSchema = new Schema({
             ref: 'users',
             required: true
         },
-        user_name: {
+        userName: {
             type: String,
             required: true
         }
@@ -91,15 +91,6 @@ var postSchema = new Schema({
 {
     timestamps: true
 });
-
-
-// postSchema.virtual('countLike').get(function() {
-//     return this.likeBy.length;
-// });
-//
-// postSchema.virtual('countReply').get(function() {
-//     return this.reply.length;
-// });
 
 
 var postModel = mongoose.model('posts', postSchema);

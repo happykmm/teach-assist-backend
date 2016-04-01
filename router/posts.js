@@ -169,12 +169,12 @@ router.put('/:courseId/:postId', function(req, res, next) {
         courseId: req.params.courseId,
         userId: req.users._id,
         isDel: 0
-    }, function(err, doc) {
+    }, function(err, post) {
         if (err) return next(err);
-        if (!doc) return next("该帖子不存在！");
-        doc.title = req.body.title;
-        doc.content = req.body.content;
-        doc.save();
+        if (!post) return next("该帖子不存在！");
+        post.title = req.body.title;
+        post.content = req.body.content;
+        post.save();
         res.json({code: 0});
     })
 });
@@ -188,11 +188,11 @@ router.delete('/:courseId/:postId', function(req, res, next) {
         courseId: req.params.courseId,
         userId: req.users._id,
         isDel: 0
-    }, function(err, doc) {
+    }, function(err, post) {
         if (err) return next(err);
-        if (!doc) return next("该帖子不存在！");
-        doc.del++;
-        doc.save();
+        if (!post) return next("该帖子不存在！");
+        post.isDel++;
+        post.save();
         res.json({code: 0});
     });
 });
@@ -203,16 +203,15 @@ router.delete('/:courseId/:postId', function(req, res, next) {
 router.put('/:courseId/:postId/top', function(req, res, next) {
     if (req.users.type !== "teacher") return next("您没有权限置顶！");
     postModel.findOne({
-        _id: req.params.postId
-    }, function(err, doc) {
+        _id: req.params.postId,
+        courseId: req.params.courseId,
+        isDel: 0
+    }, function(err, post) {
         if (err) return next(err);
-        if (!doc) return next("该帖子不存在！");
-        if (!doc.courseId.equals(req.params.courseId)) return next("该帖子不属于本课程！");
-        if (doc.del) return next("该帖子已经被删除！");
-        if (doc.parent) return next("回复内容不能置顶！");
-        doc.top = 1 - doc.top;
-        doc.save();
-        res.json({code: 0, top: doc.top});
+        if (!post) return next("该帖子不存在！");
+        post.isTop = 1 - post.isTop;
+        post.save();
+        res.json({code: 0, isTop: post.isTop});
     })
 });
 
@@ -221,23 +220,23 @@ router.put('/:courseId/:postId/top', function(req, res, next) {
 router.put('/:courseId/:postId/like', function (req, res, next) {
     postModel.findOne({
         _id: req.params.postId,
-        courseId: req.params.courseId,  //帖子属于本课程
-        del: 0,                           //帖子没有被删除
-        parent: null                      //帖子是主题帖
-    }, function(err, doc) {
+        courseId: req.params.courseId,     //帖子属于本课程
+        isDel: 0                           //帖子没有被删除
+    }, function(err, post) {
         if (err) return next(err);
-        if (!doc) return next("该帖子不存在！");
-        if (doc.like_by.id(req.users._id)) {
-            doc.like_by.id(req.users._id).remove();
-            res.json({code: 0, like: 0});
+        if (!post) return next("该帖子不存在！");
+        if (post.likeBy.id(req.users._id)) {
+            post.likeBy.id(req.users._id).remove();
+            res.json({code: 0, isLike: 0});
         } else {
-            doc.like_by.push({
+            post.likeBy.push({
                 _id: req.users._id,
-                user_name: req.users.realname
+                userName: req.users.realname
             });
-            res.json({code: 0, like: 1});
+            res.json({code: 0, isLike: 1});
         }
-        doc.save();
+        post.countLike = post.likeBy.length;
+        post.save();
     });
     
 });
