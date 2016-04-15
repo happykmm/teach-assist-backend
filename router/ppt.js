@@ -22,19 +22,12 @@ router.get('/:course_id', function(req, res, next) {
         res.json({code:1, desc:"Invalid course id!"});
     }
     courseModel.
-        find({_id: course_id}).
+        findOne({_id: course_id}).
         select({ppt: true}).
-        exec(function(err, courses) {
+        exec(function(err, course) {
             if (err) return next(err);
-            console.log(courses);
+            res.json({code: 0, ppts: course.ppt});
 
-        })
-    req.db.collection("courses")
-        .find({_id: course_id})
-        .toArray().then(function(findResult){
-            res.json({code:0, ppt: findResult[0].ppt});
-        }, function(err) {
-            res.json({code:1, desc:err.toString()});
         });
 });
 

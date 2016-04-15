@@ -18,7 +18,8 @@ router.post('/up', function(req, res) {
             {_id: course_id},
             {$addToSet: {ppt: newRecord}}
         ).then(function(updateResult) {
-            res.json({code: 0, content: [newRecord] });
+            //qiniu 规定格式
+            res.json({code: 0, content: [newRecord]});
         }, function(err) {
             res.json({code: 1, desc: err.toString()});
         })
