@@ -12,6 +12,7 @@ var ppt        = require("./router/ppt");
 var qiniu      = require("./router/qiniu");
 var self       = require("./router/self");
 var errorHandler = require("./helper/error-handler");
+var logger     = require("morgan");
 var app        = express();
 
 
@@ -19,6 +20,9 @@ app.set("jwtTokenSecret", "Happy-Christmas");
 
 
 app.use(dbInit);
+
+
+app.use(logger());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
