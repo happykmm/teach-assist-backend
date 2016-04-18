@@ -40,5 +40,5 @@ app.use(errorHandler);
 
 
 var port = process.env.PORT || 9999;
-app.listen(port);
+app.listen(port, '127.0.0.1');
 console.log('Magic happens on port '+port);
