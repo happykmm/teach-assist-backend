@@ -1,5 +1,4 @@
 var fs         = require('fs');
-var https      = require('https');
 var express    = require('express');
 var bodyParser = require('body-parser');
 var CORS       = require('./router/cors');
@@ -16,14 +15,7 @@ var errorHandler = require("./helper/error-handler");
 var app        = express();
 
 
-
 app.set("jwtTokenSecret", "Happy-Christmas");
-
-var port = process.env.PORT || 9999;
-https.createServer({
-    key: fs.readFileSync('certificates/server.key'),
-    cert: fs.readFileSync('certificates/server.crt')
-}, app).listen(port);
 
 
 app.use(dbInit);
@@ -42,4 +34,7 @@ app.use('/ppt', ppt);
 app.use('/self', self);
 app.use(errorHandler);
 
+
+var port = process.env.PORT || 9999;
+app.listen(port);
 console.log('Magic happens on port '+port);
