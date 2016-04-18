@@ -3,6 +3,7 @@ var jwt = require('jwt-simple');
 var moment = require('moment');
 var encrypt = require('../helper/encrypt');
 var userModel = require('../model/user');
+var config = require('../config');
 
 
 router.post('/', function(req, res, next) {
@@ -24,7 +25,7 @@ router.post('/', function(req, res, next) {
             var token = jwt.encode({
                 iss: user._id,
                 exp: moment().add(7, 'days').valueOf()
-            }, req.app.get("jwtTokenSecret"));
+            }, config.jwtTokenSecret);
             res.json({
                 code: 0,
                 token: token,

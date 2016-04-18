@@ -2,6 +2,7 @@ var router = require("express")();
 var jwt = require('jwt-simple');
 var ObjectId = require('mongoose').Types.ObjectId;
 var userModel = require('../model/user');
+var config = require('../config');
 
 router.get('*', check);
 router.post('*', check);
@@ -14,7 +15,7 @@ function check(req, res, next) {
         || req.headers['x-access-token'];
     if (!token) return res.status(401).send();
     try {
-        var decoded = jwt.decode(token, req.app.get('jwtTokenSecret'));
+        var decoded = jwt.decode(token, config.jwtTokenSecret);
     } catch (err) {
         next(err);
     }
