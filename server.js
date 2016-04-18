@@ -27,6 +27,7 @@ app.use(logger());
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
 app.use(bodyParser.json());
+app.use(CORS);
 app.use('/login', login);
 app.use('/qiniu', qiniu);
 app.use(loginCheck);
