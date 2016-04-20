@@ -12,11 +12,14 @@ var stream = FileStreamRotator.getStream({
     verbose: false
 });
 
-morgan.token('real-ip', function(req) {
-    console.log(req.get('X-Real-Ip'));
-    return req.get('X-Real-Ip');
+morgan.token('x-real-ip', function(req) {
+    return req.get('X-Real-IP');
 });
 
-var logger = morgan(':real-ip', {stream: stream});
+morgan.token('x-forward-for', function(req) {
+    return req.get('X-Forward-For');
+});
+
+var logger = morgan(':x-real-ip :x-forward-for', {stream: stream});
 
 module.exports = logger;
