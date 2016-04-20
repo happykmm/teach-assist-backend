@@ -1,4 +1,4 @@
-var logger = require('morgan');
+var morgan = require('morgan');
 var FileStreamRotator = require('file-stream-rotator');
 var fs = require('fs');
 
@@ -12,5 +12,11 @@ var stream = FileStreamRotator.getStream({
     verbose: false
 });
 
+morgan.token('real-ip', function(req) {
+    console.log(req.get('X-Real-Ip'));
+    return req.get('X-Real-Ip');
+});
 
-module.exports = logger('combined', {stream: stream});
+var logger = morgan(':real-ip', {stream: stream});
+
+module.exports = logger;
