@@ -16,10 +16,10 @@ morgan.token('x-real-ip', function(req) {
     return req.get('X-Real-IP');
 });
 
-morgan.token('x-forward-for', function(req) {
-    return req.get('X-Forward-For');
+morgan.token('x-forwarded-for', function(req) {
+    return req.get('X-Forwarded-For');
 });
 
-var logger = morgan(':x-real-ip :x-forward-for', {stream: stream});
+var logger = morgan(':x-real-ip :x-forwarded-for', {stream: stream});
 
 module.exports = logger;
