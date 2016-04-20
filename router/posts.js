@@ -161,6 +161,7 @@ router.post('/:courseId/:postId', function(req, res, next) {
             content: req.body.content
         });
         post.countReply++;
+        post.updatedAt = Date.now();
         post.save();
         var reply = post.reply[post.reply.length-1].toObject();
         delete reply.isDel;
@@ -184,6 +185,7 @@ router.put('/:courseId/:postId', function(req, res, next) {
         if (!post) return next("该帖子不存在！");
         post.title = req.body.title;
         post.content = req.body.content;
+        post.updatedAt = Date.now();
         post.save();
         res.json({code: 0});
     })

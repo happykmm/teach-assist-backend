@@ -91,10 +91,17 @@ var postSchema = new Schema({
             required: true
         }
     }],
-    reply: [replySchema]
-},
-{
-    timestamps: true
+    reply: [replySchema],
+    createdAt: {
+        type: Date,
+        required: true,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
 });
 
 
