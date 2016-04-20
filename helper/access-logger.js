@@ -20,6 +20,6 @@ morgan.token('x-forwarded-for', function(req) {
     return req.get('X-Forwarded-For');
 });
 
-var logger = morgan(':x-real-ip :x-forwarded-for', {stream: stream});
+var logger = morgan('[:date[iso]] :x-forwarded-for ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {stream: stream});
 
 module.exports = logger;
