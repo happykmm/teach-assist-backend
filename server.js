@@ -1,3 +1,5 @@
+global.appRoot = __dirname;
+
 var fs         = require('fs');
 var express    = require('express');
 var bodyParser = require('body-parser');
@@ -6,6 +8,7 @@ var logger     = require("morgan");
 var CORS         = require('./helper/cors');
 var dbInit       = require('./helper/db-init');
 var errorHandler = require("./helper/error-handler");
+var accessLogger = require("./helper/access-logger");
 
 var loginCheck = require('./router/login-check');
 var login      = require('./router/login');
@@ -21,7 +24,7 @@ var app        = express();
 
 
 app.use(dbInit);
-app.use(logger());
+app.use(accessLogger);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
