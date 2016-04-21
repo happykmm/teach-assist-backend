@@ -10,7 +10,7 @@ qiniu.conf.SECRET_KEY = "CJTmK6SY0DgiUsKjashWvp1z-Iob9pTlnWhYGt-L";
 router.get('/token', function(req, res) {
     var putPolicy = new qiniu.rs.PutPolicy("tasystem");
     //putPolicy.expires = 3600;
-    putPolicy.callbackUrl = "https://teachassist.xyz:9999/qiniu/up";
+    putPolicy.callbackUrl = "https://teachassist.xyz/api/qiniu/up";
     putPolicy.callbackBody = "filename=$(fname)&storename=$(key)&course_id=$(x:course_id)";
     res.json({code:0, token:putPolicy.token()});
 });
